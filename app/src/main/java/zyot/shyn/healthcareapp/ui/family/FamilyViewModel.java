@@ -1,16 +1,15 @@
-package zyot.shyn.healthcareapp.ui.setting;
+package zyot.shyn.healthcareapp.ui.family;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-public class SlideshowViewModel extends ViewModel {
-
+public class FamilyViewModel extends ViewModel {
     private MutableLiveData<String> mText;
 
-    public SlideshowViewModel() {
+    public FamilyViewModel() {
         mText = new MutableLiveData<>();
-        mText.setValue("This is slideshow fragment");
+        mText.setValue("This is gallery fragment");
     }
 
     public LiveData<String> getText() {
