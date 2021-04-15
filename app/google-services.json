@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "948172234645",
+    "project_id": "health-care-app-8354f",
+    "storage_bucket": "health-care-app-8354f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:948172234645:android:e9e05870bec485dd74e09c",
+        "android_client_info": {
+          "package_name": "zyot.shyn.healthcareapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "948172234645-dpbrpum2uo970ehft450u5q8nlivq8j2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjslEvQAneztRqVvMiqk22s8iER8tcyzc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "948172234645-dpbrpum2uo970ehft450u5q8nlivq8j2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
