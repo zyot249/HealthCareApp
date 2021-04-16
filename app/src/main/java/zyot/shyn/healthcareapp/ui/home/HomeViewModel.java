@@ -6,18 +6,29 @@ import androidx.lifecycle.ViewModel;
 
 public class HomeViewModel extends ViewModel {
 
-    private MutableLiveData<String> mText;
+    private MutableLiveData<String> weight;
+    private MutableLiveData<String> height;
 
     public HomeViewModel() {
-        mText = new MutableLiveData<>();
-        mText.setValue("This is home fragment");
+        weight = new MutableLiveData<>();
+        weight.setValue("0");
+        height = new MutableLiveData<>();
+        height.setValue("0");
     }
 
-    public LiveData<String> getText() {
-        return mText;
+    public LiveData<String> getWeight() {
+        return weight;
     }
 
-    public void setText(String text) {
-        mText.setValue(text);
+    public LiveData<String> getHeight() {
+        return height;
+    }
+
+    public void setWeight(String w) {
+        weight.setValue(w);
+    }
+
+    public void setHeight(String h) {
+        height.setValue(h);
     }
 }

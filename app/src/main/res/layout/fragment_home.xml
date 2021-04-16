@@ -6,106 +6,345 @@
     android:layout_height="match_parent"
     tools:context=".ui.home.HomeFragment">
 
-    <com.google.android.material.card.MaterialCardView
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background=""
-        app:layout_constraintHeight_percent="0.4"
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintWidth_percent="0.9">
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content">
 
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:contentDescription="Background Image"
-                android:src="@mipmap/medical_background"
-                app:layout_constraintBottom_toBottomOf="parent"
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/exercise_info_view"
+                android:layout_width="0dp"
+                android:layout_height="250dp"
+                android:layout_marginTop="16dp"
+                app:cardElevation="10dp"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintWidth_percent="0.9"
+                app:strokeColor="@color/cardview_dark_background"
+                app:strokeWidth="3dp">
 
-            <LinearLayout
-                android:id="@+id/foot_step_layout"
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/cardview_dark_background"
+                    android:padding="16dp">
+
+                    <LinearLayout
+                        android:id="@+id/foot_step_layout"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:orientation="vertical"
+                        app:layout_constraintHeight_percent="0.4"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintRight_toLeftOf="@+id/calo_layout"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintWidth_percent="0.28">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="Foot Steps"
+                            android:textColor="@color/cardview_light_background"
+                            android:textSize="18dp" />
+
+                        <TextView
+                            android:id="@+id/foot_step_txt"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="510"
+                            android:textColor="@color/cardview_light_background"
+                            android:textSize="22dp" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/calo_layout"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:orientation="vertical"
+                        app:layout_constraintHeight_percent="0.4"
+                        app:layout_constraintLeft_toRightOf="@+id/foot_step_layout"
+                        app:layout_constraintRight_toLeftOf="@+id/time_layout"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintWidth_percent="0.28">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="KCal"
+                            android:textColor="@color/cardview_light_background"
+                            android:textSize="18dp" />
+
+                        <TextView
+                            android:id="@+id/calo_txt"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="510"
+                            android:textColor="@color/cardview_light_background"
+                            android:textSize="22dp" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/time_layout"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:orientation="vertical"
+                        app:layout_constraintHeight_percent="0.4"
+                        app:layout_constraintLeft_toRightOf="@+id/calo_layout"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintWidth_percent="0.28">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="Time"
+                            android:textColor="@color/cardview_light_background"
+                            android:textSize="18dp" />
+
+                        <TextView
+                            android:id="@+id/time_txt"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="510"
+                            android:textColor="@color/cardview_light_background"
+                            android:textSize="22dp" />
+
+                    </LinearLayout>
+
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/weight_info_view"
                 android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:orientation="vertical"
-                app:layout_constraintHeight_percent="0.4"
+                android:layout_height="125dp"
+                android:layout_marginTop="16dp"
+                app:cardElevation="10dp"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toLeftOf="@+id/cal_layout"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintWidth_percent="0.25">
+                app:layout_constraintRight_toLeftOf="@+id/height_info_view"
+                app:layout_constraintStart_toStartOf="@+id/exercise_info_view"
+                app:layout_constraintTop_toBottomOf="@+id/exercise_info_view"
+                app:layout_constraintWidth_percent="0.42"
+                app:strokeColor="@color/cardview_dark_background"
+                app:strokeWidth="3dp">
 
-                <TextView
-                    android:layout_weight="1"
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Foot Steps" />
+                    android:layout_height="match_parent"
+                    android:background="@color/cardview_dark_background"
+                    android:padding="16dp">
 
-                <TextView
-                    android:layout_weight="1"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="510" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
 
-            </LinearLayout>
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="start"
+                            android:text="Weight"
+                            android:textColor="@color/cardview_light_background"
+                            android:textSize="18dp" />
 
-            <LinearLayout
-                android:id="@+id/cal_layout"
+                        <TextView
+                            android:id="@+id/weight_txt"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="start"
+                            android:text="510"
+                            android:textColor="@color/cardview_light_background"
+                            android:textSize="22dp" />
+
+                    </LinearLayout>
+
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/height_info_view"
                 android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:orientation="vertical"
-                app:layout_constraintHeight_percent="0.4"
-                app:layout_constraintLeft_toRightOf="@+id/foot_step_layout"
-                app:layout_constraintRight_toLeftOf="@+id/time_layout"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintWidth_percent="0.25">
-
-                <TextView
-                    android:layout_weight="1"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Foot Steps" />
-
-                <TextView
-                    android:layout_weight="1"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="510" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/time_layout"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:orientation="vertical"
-                app:layout_constraintHeight_percent="0.4"
-                app:layout_constraintLeft_toRightOf="@+id/cal_layout"
+                android:layout_height="125dp"
+                android:layout_marginTop="16dp"
+                app:cardElevation="10dp"
+                app:layout_constraintEnd_toEndOf="@+id/exercise_info_view"
+                app:layout_constraintLeft_toRightOf="@+id/weight_info_view"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintWidth_percent="0.25">
+                app:layout_constraintTop_toBottomOf="@+id/exercise_info_view"
+                app:layout_constraintWidth_percent="0.42"
+                app:strokeColor="@color/cardview_dark_background"
+                app:strokeWidth="3dp">
 
-                <TextView
-                    android:layout_weight="1"
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Foot Steps" />
+                    android:layout_height="match_parent"
+                    android:background="@color/cardview_dark_background"
+                    android:padding="16dp">
 
-                <TextView
-                    android:layout_weight="1"
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="start"
+                            android:text="Height"
+                            android:textColor="@color/cardview_light_background"
+                            android:textSize="18dp" />
+
+                        <TextView
+                            android:id="@+id/height_txt"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="start"
+                            android:text="510"
+                            android:textColor="@color/cardview_light_background"
+                            android:textSize="22dp" />
+
+                    </LinearLayout>
+
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/spo2_info_view"
+                android:layout_width="0dp"
+                android:layout_height="125dp"
+                android:layout_marginTop="16dp"
+                app:cardElevation="10dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toLeftOf="@+id/heart_rate_info_view"
+                app:layout_constraintStart_toStartOf="@+id/weight_info_view"
+                app:layout_constraintTop_toBottomOf="@+id/weight_info_view"
+                app:layout_constraintWidth_percent="0.42"
+                app:strokeColor="@color/cardview_dark_background"
+                app:strokeWidth="3dp">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="510" />
+                    android:layout_height="match_parent"
+                    android:background="@color/cardview_dark_background"
+                    android:padding="16dp">
 
-            </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="start"
+                            android:text="SpO2"
+                            android:textColor="@color/cardview_light_background"
+                            android:textSize="18dp" />
+
+                        <TextView
+                            android:id="@+id/spo2_txt"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="start"
+                            android:text="510"
+                            android:textColor="@color/cardview_light_background"
+                            android:textSize="22dp" />
+
+                    </LinearLayout>
 
 
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/heart_rate_info_view"
+                android:layout_width="0dp"
+                android:layout_height="125dp"
+                android:layout_marginTop="16dp"
+                app:cardElevation="10dp"
+                app:layout_constraintEnd_toEndOf="@+id/height_info_view"
+                app:layout_constraintLeft_toRightOf="@+id/spo2_info_view"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/height_info_view"
+                app:layout_constraintWidth_percent="0.42"
+                app:strokeColor="@color/cardview_dark_background"
+                app:strokeWidth="3dp">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/cardview_dark_background"
+                    android:padding="16dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="start"
+                            android:text="Heart Rate"
+                            android:textColor="@color/cardview_light_background"
+                            android:textSize="18dp" />
+
+                        <TextView
+                            android:id="@+id/heart_rate_txt"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="start"
+                            android:text="510"
+                            android:textColor="@color/cardview_light_background"
+                            android:textSize="22dp" />
+
+                    </LinearLayout>
+
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
         </androidx.constraintlayout.widget.ConstraintLayout>
-    </com.google.android.material.card.MaterialCardView>
+    </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>
