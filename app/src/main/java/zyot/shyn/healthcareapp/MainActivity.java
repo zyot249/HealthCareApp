@@ -24,6 +24,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import zyot.shyn.HARClassifier;
 import zyot.shyn.healthcareapp.base.BaseActivity;
 import zyot.shyn.healthcareapp.model.User;
 
@@ -38,6 +39,7 @@ public class MainActivity extends BaseActivity {
 
     private ImageView avaImg;
     private TextView displayNameTxt;
+    private HARClassifier classifier;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +85,8 @@ public class MainActivity extends BaseActivity {
 
             }
         });
+
+        classifier = new HARClassifier(getApplicationContext());
     }
 
     @Override
