@@ -1,4 +1,4 @@
-package zyot.shyn.healthcareapp;
+package zyot.shyn.healthcareapp.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,6 +10,7 @@ import androidx.appcompat.widget.Toolbar;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 
+import zyot.shyn.healthcareapp.R;
 import zyot.shyn.healthcareapp.base.BaseActivity;
 import zyot.shyn.healthcareapp.utils.MyString;
 

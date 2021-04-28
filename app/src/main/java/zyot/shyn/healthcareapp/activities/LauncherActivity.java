@@ -1,4 +1,4 @@
-package zyot.shyn.healthcareapp;
+package zyot.shyn.healthcareapp.activities;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,6 +8,7 @@ import android.preference.PreferenceManager;
 
 import androidx.annotation.Nullable;
 
+import zyot.shyn.healthcareapp.R;
 import zyot.shyn.healthcareapp.base.BaseActivity;
 
 public class LauncherActivity extends BaseActivity {
@@ -28,7 +29,7 @@ public class LauncherActivity extends BaseActivity {
             public void run() {
                 Intent intent;
                 if (password.equals("")) { // nếu không có pass
-                    intent = new Intent(LauncherActivity.this, SignInActivity.class);
+                    intent = new Intent(LauncherActivity.this, MainActivity.class);
                 } else { // nếu có pass
                     // start LockScreen
                     intent = new Intent(LauncherActivity.this, MainActivity.class);

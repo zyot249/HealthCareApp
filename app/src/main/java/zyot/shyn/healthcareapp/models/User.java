@@ -1,4 +1,4 @@
-package zyot.shyn.healthcareapp.model;
+package zyot.shyn.healthcareapp.models;
 
 public class User {
     private String id;

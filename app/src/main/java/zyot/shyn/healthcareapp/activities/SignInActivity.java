@@ -1,4 +1,4 @@
-package zyot.shyn.healthcareapp;
+package zyot.shyn.healthcareapp.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,6 +16,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
+import zyot.shyn.healthcareapp.R;
 import zyot.shyn.healthcareapp.base.BaseActivity;
 
 public class SignInActivity extends BaseActivity implements View.OnClickListener {

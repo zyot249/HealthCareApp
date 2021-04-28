@@ -16,4 +16,11 @@
     <string name="menu_setting">Setting</string>
     <string name="menu_practice">Practice</string>
     <string name="menu_family">Family</string>
+
+    <string name="steps">%1$d</string>
+    <string name="steps1">Steps: %1$d</string>
+    <string name="time">%1$s</string>
+    <string name="speed">%1$d steps/min</string>
+    <string name="distance">Distance: %1$s m</string>
+    <string name="orientation">Orientation: %1$s</string>
 </resources>

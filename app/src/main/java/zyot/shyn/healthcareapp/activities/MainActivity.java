@@ -1,5 +1,7 @@
-package zyot.shyn.healthcareapp;
+package zyot.shyn.healthcareapp.activities;
 
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -24,9 +26,11 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import zyot.shyn.HARClassifier;
+import zyot.shyn.healthcareapp.R;
 import zyot.shyn.healthcareapp.base.BaseActivity;
-import zyot.shyn.healthcareapp.model.User;
+import zyot.shyn.healthcareapp.base.Constants;
+import zyot.shyn.healthcareapp.models.User;
+import zyot.shyn.healthcareapp.services.StepCountService;
 
 public class MainActivity extends BaseActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -39,7 +43,6 @@ public class MainActivity extends BaseActivity {
 
     private ImageView avaImg;
     private TextView displayNameTxt;
-    private HARClassifier classifier;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +89,9 @@ public class MainActivity extends BaseActivity {
             }
         });
 
-        classifier = new HARClassifier(getApplicationContext());
+        Intent startIntent = new Intent(this, StepCountService.class);
+        startIntent.setAction(Constants.START_FOREGROUND);
+        startService(startIntent);
     }
 
     @Override
@@ -101,5 +106,18 @@ public class MainActivity extends BaseActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Intent stopIntent = new Intent(this, StepCountService.class);
+        stopIntent.setAction(Constants.STOP_FOREGROUND);
+        startService(stopIntent);
     }
 }

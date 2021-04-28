@@ -1,8 +1,7 @@
-package zyot.shyn.healthcareapp;
+package zyot.shyn.healthcareapp.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -14,14 +13,14 @@ import androidx.appcompat.widget.Toolbar;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import zyot.shyn.healthcareapp.R;
 import zyot.shyn.healthcareapp.base.BaseActivity;
-import zyot.shyn.healthcareapp.model.User;
+import zyot.shyn.healthcareapp.models.User;
 import zyot.shyn.healthcareapp.utils.MyString;
 
 public class SignUpActivity extends BaseActivity {
