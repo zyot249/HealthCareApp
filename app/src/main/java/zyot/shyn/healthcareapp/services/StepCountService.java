@@ -26,22 +26,20 @@ import androidx.core.app.NotificationCompat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import zyot.shyn.HARClassifier;
 import zyot.shyn.HumanActivity;
 import zyot.shyn.healthcareapp.R;
 import zyot.shyn.healthcareapp.activities.MainActivity;
 import zyot.shyn.healthcareapp.base.Constants;
+import zyot.shyn.healthcareapp.models.AccelerationData;
 
-public class StepCountService extends Service implements SensorEventListener {
+public class StepCountService extends Service implements SensorEventListener, StepListener {
     private static final String TAG = StepCountService.class.getSimpleName();
     //Sensors
     private SensorManager mSensorManager;
-    private Sensor mAccelerometer;
-    private Sensor mGyroscope;
-    private Sensor mLinearAcceleration;
-    private Sensor mStepCounter;
-    private Sensor mStepDetectorSensor;
+    private Sensor mAccelerometer, mGyroscope, mLinearAcceleration, mStepCounter, mStepDetectorSensor;
 
     private long startTime = 0;
     long timeInMilliseconds = 0;
@@ -51,17 +49,9 @@ public class StepCountService extends Service implements SensorEventListener {
     private String elapsedString;
 
     //data sensor
-    private static List<Float> ax;
-    private static List<Float> ay;
-    private static List<Float> az;
-
-    private static List<Float> lx;
-    private static List<Float> ly;
-    private static List<Float> lz;
-
-    private static List<Float> gx;
-    private static List<Float> gy;
-    private static List<Float> gz;
+    private static List<Float> ax, ay, az;
+    private static List<Float> lx, ly, lz;
+    private static List<Float> gx, gy, gz;
 
     private long stepCount = 0;
     private long lastSteps = 0;
@@ -69,11 +59,16 @@ public class StepCountService extends Service implements SensorEventListener {
     private int prevStepCount = 0;
     private long stepTimestamp = 0;
     private int speed = 0;
-    private double distance = 0;
+    private float totalDistance = 0;
+
+    private StepDetector stepDetector;
+
+    private int amountOfSteps;
+    private int walkingSteps, joggingSteps, runningSteps;
+    private float totalCaloriesBurned = 0, totalDuration = 0;
 
     private long lastTimeActPrediction = 0;
-    private long activeTime = 0;
-    private long relaxTime = 0;
+    private long activeTime = 0, relaxTime = 0;
 
     HARClassifier classifier;
 
@@ -91,9 +86,9 @@ public class StepCountService extends Service implements SensorEventListener {
         super.onCreate();
         createNotificationChannel();
 
-        ax = new ArrayList<>(); ay = new ArrayList<>(); az = new ArrayList<>();
-        lx = new ArrayList<>(); ly = new ArrayList<>(); lz = new ArrayList<>();
-        gx = new ArrayList<>(); gy = new ArrayList<>(); gz = new ArrayList<>();
+        ax = ay = az = new ArrayList<>();
+        lx = ly = lz = new ArrayList<>();
+        gx = gy = gz = new ArrayList<>();
 
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -105,6 +100,9 @@ public class StepCountService extends Service implements SensorEventListener {
         lastTimeActPrediction = System.currentTimeMillis();
 
         classifier = new HARClassifier(getApplicationContext());
+
+        stepDetector = new StepDetector();
+        stepDetector.registerStepListener(this);
     }
 
     @Override
@@ -173,6 +171,13 @@ public class StepCountService extends Service implements SensorEventListener {
                 ax.add(event.values[0]);
                 ay.add(event.values[1]);
                 az.add(event.values[2]);
+
+                AccelerationData newAccelerationData = new AccelerationData();
+                newAccelerationData.setX(event.values[0]);
+                newAccelerationData.setY(event.values[1]);
+                newAccelerationData.setZ(event.values[2]);
+                newAccelerationData.setTime(event.timestamp);
+                stepDetector.addAccelerationData(newAccelerationData);
                 break;
             case Sensor.TYPE_GYROSCOPE:
                 gx.add(event.values[0]);
@@ -274,7 +279,7 @@ public class StepCountService extends Service implements SensorEventListener {
 
     public void resetCount() {
         stepCount = 0;
-        distance = 0;
+        totalDistance = 0;
         startTime = SystemClock.uptimeMillis();
         updatedTime = elapsedTime;
     }
@@ -336,21 +341,21 @@ public class StepCountService extends Service implements SensorEventListener {
 
     public HashMap<String, String> getData() {
         HashMap<String, String> data = new HashMap<>();
-        String distanceString = String.format("%.2f", lastDistance + distance);
 
-        int seconds = (int) (updatedTime / 1000);
-        int minutes = seconds / 60;
-        int hours = minutes / 60;
-        seconds = seconds % 60;
-        minutes = minutes % 60;
-        timeString = String.format("%d:%s:%s", hours, String.format("%02d", minutes), String.format("%02d", seconds));
+        float hours = totalDuration / 3600;
+        float minutes = (totalDuration % 3600) / 60;
+        float seconds = totalDuration % 60;
+        String duration = String.format(Locale.ENGLISH,"%.0f", hours) + "h " +
+                String.format(Locale.ENGLISH, "%.0f", minutes) + "min " +
+                String.format(Locale.ENGLISH, "%.0f", seconds) + "s";
 
-        data.put("steps", String.format(getString(R.string.steps), lastSteps + stepCount));
-        data.put("distance", String.format(getString(R.string.distance), distanceString));
-        data.put("duration", String.format(getString(R.string.time), timeString));
+        data.put("steps", String.valueOf(amountOfSteps));
+        data.put("distance", String.format(getString(R.string.distance), totalDistance));
+        data.put("duration", duration);
         data.put("speed", String.format(getResources().getString(R.string.speed), speed));
         data.put("relaxTime", String.valueOf(relaxTime));
         data.put("activeTime", String.valueOf(activeTime));
+        data.put("caloBurned", String.format(Locale.ENGLISH, "%.0f", totalCaloriesBurned));
         return data;
     }
 
@@ -360,16 +365,33 @@ public class StepCountService extends Service implements SensorEventListener {
         stepCount += step;
 
         //Distance calculation
-        distance = stepCount * 0.8; //Average step length in an average adult
+        totalDistance = (float) (stepCount * 0.8); //Average step length in an average adult
     }
 
     //Calculated the amount of steps taken per minute at the current rate
     private void calculateSpeed(long eventTimeStamp, int steps) {
-
         long timestampDifference = eventTimeStamp - stepTimestamp;
         stepTimestamp = eventTimeStamp;
         double stepTime = timestampDifference / 1000000000.0;
         speed = (int) (60 / stepTime);
+    }
+
+    private void calculateResults(){
+        totalDistance = walkingSteps * 0.5f + joggingSteps * 1.0f + runningSteps * 1.5f;
+        totalDuration = walkingSteps * 1.0f + joggingSteps * 0.75f + runningSteps * 0.5f;
+        totalCaloriesBurned = walkingSteps + 0.05f + joggingSteps * 0.1f + runningSteps * 0.2f;
+    }
+
+    @Override
+    public void step(AccelerationData accelerationData, StepType stepType) {
+        amountOfSteps++;
+        if (stepType == StepType.WALKING) {
+            walkingSteps++;
+        } else if (stepType == StepType.JOGGING) {
+            joggingSteps++;
+        } else {
+            runningSteps++;
+        }
     }
 
     public class MyBinder extends Binder {
@@ -393,6 +415,7 @@ public class StepCountService extends Service implements SensorEventListener {
             startForeground(notification_id, notification);
 //            Log.d(TAG, timeString);
             activityPrediction();
+            calculateResults();
             handler.postDelayed(this, 1000);
         }
     };

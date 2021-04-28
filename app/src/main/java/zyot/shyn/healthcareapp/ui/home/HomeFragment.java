@@ -5,7 +5,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
@@ -15,19 +14,16 @@ import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.HashMap;
@@ -81,7 +77,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         homeViewModel.getWeight().observe(getViewLifecycleOwner(), s -> weightTxt.setText(s));
         homeViewModel.getHeight().observe(getViewLifecycleOwner(), s -> heightTxt.setText(s));
         homeViewModel.getSteps().observe(getViewLifecycleOwner(), s -> footStepsTxt.setText(s));
-        homeViewModel.getKcal().observe(getViewLifecycleOwner(), s -> kcalTxt.setText(s));
+        homeViewModel.getCalo().observe(getViewLifecycleOwner(), s -> kcalTxt.setText(s));
         homeViewModel.getTime().observe(getViewLifecycleOwner(), s -> timeTxt.setText(s));
         homeViewModel.getSpo2().observe(getViewLifecycleOwner(), s -> spo2Txt.setText(s));
         homeViewModel.getHeartRate().observe(getViewLifecycleOwner(), s -> heartRateTxt.setText(s));
@@ -198,7 +194,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
                     homeViewModel.setSteps(data.get("steps"));
                     homeViewModel.setTime(data.get("duration"));
-                    homeViewModel.setKcal(data.get("speed"));
+                    homeViewModel.setCalo(data.get("caloBurned"));
                     homeViewModel.setSpo2(data.get("relaxTime"));
                     homeViewModel.setHeartRate(data.get("activeTime"));
                 }

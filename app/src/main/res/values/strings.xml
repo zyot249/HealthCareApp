@@ -21,6 +21,6 @@
     <string name="steps1">Steps: %1$d</string>
     <string name="time">%1$s</string>
     <string name="speed">%1$d steps/min</string>
-    <string name="distance">Distance: %1$s m</string>
+    <string name="distance">Distance: %1$f m</string>
     <string name="orientation">Orientation: %1$s</string>
 </resources>
