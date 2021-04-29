@@ -19,24 +19,24 @@ public class StepDetector {
     private ArrayList<AccelerationData> newAccelerationDataList;
     private ArrayList<AccelerationData> calculatedList;
 
-    public StepDetector(){
+    public StepDetector() {
         newAccelerationDataList = new ArrayList<>();
         calculatedList = new ArrayList<>();
     }
 
-    public void registerStepListener(StepListener pStepListener){
+    public void registerStepListener(StepListener pStepListener) {
         stepListener = pStepListener;
     }
 
-    public void addAccelerationData(AccelerationData pNewAccelerationData){
+    public void addAccelerationData(AccelerationData pNewAccelerationData) {
         newAccelerationDataList.add(pNewAccelerationData);
 
-        if(newAccelerationDataList.size() >= 25){
+        if (newAccelerationDataList.size() >= 25) {
             handleAccelerationData();
         }
     }
 
-    private void handleAccelerationData(){
+    private void handleAccelerationData() {
 
         for (int i = 0; i < newAccelerationDataList.size(); i++) {
             AccelerationData accelerationData = newAccelerationDataList.get(i);
@@ -52,7 +52,7 @@ public class StepDetector {
         newAccelerationDataList.clear();
     }
 
-    private AccelerationData calculateValueAndTime(AccelerationData pAccelerationData){
+    private AccelerationData calculateValueAndTime(AccelerationData pAccelerationData) {
         float x = pAccelerationData.getX();
         float y = pAccelerationData.getY();
         float z = pAccelerationData.getZ();
@@ -68,19 +68,18 @@ public class StepDetector {
         return pAccelerationData;
     }
 
-    private ArrayList<AccelerationData> findHighPoints(){
+    private ArrayList<AccelerationData> findHighPoints() {
         ArrayList<AccelerationData> highPointList = new ArrayList<>();
         ArrayList<AccelerationData> aboveWalkingThresholdList = new ArrayList<>();
         boolean wasAboveThreshold = true;
         for (int i = 0; i < calculatedList.size(); i++) {
 
             AccelerationData calculatedDataSet = calculatedList.get(i);
-            if(calculatedDataSet.getValue() > WALKING_THRESHOLD){
+            if (calculatedDataSet.getValue() > WALKING_THRESHOLD) {
                 aboveWalkingThresholdList.add(calculatedDataSet);
                 wasAboveThreshold = true;
             } else {
-                    // erst, wenn es einen Wert unter WALKINGTHRESHOLD gibt
-                if(wasAboveThreshold && aboveWalkingThresholdList.size() > 0){
+                if (wasAboveThreshold && aboveWalkingThresholdList.size() > 0) {
                     Collections.sort(aboveWalkingThresholdList, new AccelerationDataSorter());
                     highPointList.add(aboveWalkingThresholdList.get(aboveWalkingThresholdList.size() - 1));
                     aboveWalkingThresholdList.clear();
@@ -91,11 +90,11 @@ public class StepDetector {
         return highPointList;
     }
 
-    private ArrayList<AccelerationData> removeNearHighPoints(ArrayList<AccelerationData> pAccelerationDataList){
+    private ArrayList<AccelerationData> removeNearHighPoints(ArrayList<AccelerationData> pAccelerationDataList) {
         ArrayList<Integer> wrongHighPointIndexes = new ArrayList<>();
         for (int i = 0; i < pAccelerationDataList.size() - 1; i++) {
-            if((pAccelerationDataList.get(i + 1).getTime() - pAccelerationDataList.get(i).getTime()) < 400){
-                if(pAccelerationDataList.get(i + 1).getValue() < pAccelerationDataList.get(i).getValue()){
+            if ((pAccelerationDataList.get(i + 1).getTime() - pAccelerationDataList.get(i).getTime()) < 400) {
+                if (pAccelerationDataList.get(i + 1).getValue() < pAccelerationDataList.get(i).getValue()) {
                     wrongHighPointIndexes.add(i + 1);
                 } else {
                     wrongHighPointIndexes.add(i);
@@ -109,12 +108,12 @@ public class StepDetector {
         return pAccelerationDataList;
     }
 
-    private void examineStepTypeAndSendResponse(ArrayList<AccelerationData> pAccelerationDataList){
+    private void examineStepTypeAndSendResponse(ArrayList<AccelerationData> pAccelerationDataList) {
         for (int i = 0; i < pAccelerationDataList.size(); i++) {
             AccelerationData highPoint = pAccelerationDataList.get(i);
-            if(highPoint.getValue() > RUNNING_THRESHOLD){
+            if (highPoint.getValue() > RUNNING_THRESHOLD) {
                 stepListener.step(highPoint, StepType.RUNNING);
-            } else if(highPoint.getValue() > JOGGING_THRESHOLD){
+            } else if (highPoint.getValue() > JOGGING_THRESHOLD) {
                 stepListener.step(highPoint, StepType.JOGGING);
             } else {
                 stepListener.step(highPoint, StepType.WALKING);
@@ -126,9 +125,9 @@ public class StepDetector {
         @Override
         public int compare(AccelerationData data1, AccelerationData data2) {
             int returnValue = 0;
-            if(data1.getValue() < data2.getValue()){
+            if (data1.getValue() < data2.getValue()) {
                 returnValue = -1;
-            } else if(data1.getValue() > data2.getValue()){
+            } else if (data1.getValue() > data2.getValue()) {
                 returnValue = 1;
             }
             return returnValue;

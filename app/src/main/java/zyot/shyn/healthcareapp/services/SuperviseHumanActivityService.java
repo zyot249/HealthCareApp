@@ -35,8 +35,8 @@ import zyot.shyn.healthcareapp.activities.MainActivity;
 import zyot.shyn.healthcareapp.base.Constants;
 import zyot.shyn.healthcareapp.models.AccelerationData;
 
-public class StepCountService extends Service implements SensorEventListener, StepListener {
-    private static final String TAG = StepCountService.class.getSimpleName();
+public class SuperviseHumanActivityService extends Service implements SensorEventListener, StepListener {
+    private static final String TAG = SuperviseHumanActivityService.class.getSimpleName();
     //Sensors
     private SensorManager mSensorManager;
     private Sensor mAccelerometer, mGyroscope, mLinearAcceleration, mStepCounter, mStepDetectorSensor;
@@ -45,37 +45,27 @@ public class StepCountService extends Service implements SensorEventListener, St
     long timeInMilliseconds = 0;
     long elapsedTime = 0;
     long updatedTime = 0;
-    private String timeString;
-    private String elapsedString;
 
     //data sensor
     private static List<Float> ax, ay, az;
     private static List<Float> lx, ly, lz;
     private static List<Float> gx, gy, gz;
 
-    private long stepCount = 0;
-    private long lastSteps = 0;
-    private double lastDistance = 0;
-    private int prevStepCount = 0;
-    private long stepTimestamp = 0;
-    private int speed = 0;
-    private float totalDistance = 0;
-
     private StepDetector stepDetector;
+    HARClassifier classifier;
 
     private int amountOfSteps;
-    private int walkingSteps, joggingSteps, runningSteps;
-    private float totalCaloriesBurned = 0, totalDuration = 0;
+    private int walkingSteps, joggingSteps, downstairsSteps, upstairsSteps;
+    private float totalCaloriesBurned = 0, totalDuration = 0, totalDistance = 0;
 
     private long lastTimeActPrediction = 0;
+    private HumanActivity curState = HumanActivity.UNKNOWN;
     private long activeTime = 0, relaxTime = 0;
-
-    HARClassifier classifier;
 
     private boolean isActive = false;
 
     private Handler handler = new Handler();
-    String CHANNEL_ID = "healthcareapp_stepcountservice";
+    String CHANNEL_ID = "healthcareapp_supervisorservice";
     int notification_id = 1711101;
 
     private IBinder mBinder = new MyBinder();
@@ -115,7 +105,7 @@ public class StepCountService extends Service implements SensorEventListener, St
                 break;
 
             case Constants.RESET_COUNT:
-                resetCount();
+                resetData();
                 break;
 
             case Constants.STOP_SAVE_COUNT:
@@ -155,17 +145,6 @@ public class StepCountService extends Service implements SensorEventListener, St
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-//        activityPrediction();
-
-        if (event.sensor == mStepCounter) {
-            if (prevStepCount < 1) {
-                prevStepCount = (int) event.values[0];
-            }
-            calculateSpeed(event.timestamp, (int) (event.values[0] - prevStepCount - stepCount));
-            countSteps((int) (event.values[0] - prevStepCount - stepCount));
-            Log.d(TAG, "steps count: " + event.values[0]);
-        }
-
         switch (event.sensor.getType()) {
             case Sensor.TYPE_ACCELEROMETER:
                 ax.add(event.values[0]);
@@ -189,34 +168,19 @@ public class StepCountService extends Service implements SensorEventListener, St
                 ly.add(event.values[1]);
                 lz.add(event.values[2]);
                 break;
-            case Sensor.TYPE_STEP_COUNTER:
-                if (prevStepCount < 1) {
-                    prevStepCount = (int) event.values[0];
-                }
-                calculateSpeed(event.timestamp, (int) (event.values[0] - prevStepCount - stepCount));
-                countSteps((int) (event.values[0] - prevStepCount - stepCount));
-                Log.d(TAG, "steps count: " + event.values[0]);
-                break;
-            case Sensor.TYPE_STEP_DETECTOR:
-                if (mStepCounter == null) {
-                    countSteps((int) event.values[0]);
-                    calculateSpeed(event.timestamp, 1);
-                }
-                Log.d(TAG, "steps detector: " + event.values[0]);
-                break;
         }
     }
 
     private void activityPrediction() {
         int index = classifier.predictHumanActivity(ax, ay, az, lx, ly, lz, gx, gy, gz);
         if (index != -1) {
-            String activity = HumanActivity.getHumanActivity(index).toString();
             long now = System.currentTimeMillis();
             if (index == 3 || index == 4) {
                 relaxTime += (now - lastTimeActPrediction);
             } else {
                 activeTime += (now - lastTimeActPrediction);
             }
+            curState = HumanActivity.getHumanActivity(index);
             lastTimeActPrediction = now;
         }
     }
@@ -228,36 +192,36 @@ public class StepCountService extends Service implements SensorEventListener, St
 
     private void registerSensors() {
         if (mLinearAcceleration != null)
-            mSensorManager.registerListener(StepCountService.this, mLinearAcceleration, SensorManager.SENSOR_DELAY_FASTEST);
+            mSensorManager.registerListener(SuperviseHumanActivityService.this, mLinearAcceleration, SensorManager.SENSOR_DELAY_FASTEST);
 
         if (mAccelerometer != null)
-            mSensorManager.registerListener(StepCountService.this, mAccelerometer, SensorManager.SENSOR_DELAY_FASTEST);
+            mSensorManager.registerListener(SuperviseHumanActivityService.this, mAccelerometer, SensorManager.SENSOR_DELAY_FASTEST);
 
         if (mGyroscope != null)
-            mSensorManager.registerListener(StepCountService.this, mGyroscope, SensorManager.SENSOR_DELAY_FASTEST);
+            mSensorManager.registerListener(SuperviseHumanActivityService.this, mGyroscope, SensorManager.SENSOR_DELAY_FASTEST);
 
         if (mStepCounter != null)
-            mSensorManager.registerListener(StepCountService.this, mStepCounter, SensorManager.SENSOR_DELAY_NORMAL);
+            mSensorManager.registerListener(SuperviseHumanActivityService.this, mStepCounter, SensorManager.SENSOR_DELAY_NORMAL);
 
         if (mStepDetectorSensor != null)
-            mSensorManager.registerListener(StepCountService.this, mStepDetectorSensor, SensorManager.SENSOR_DELAY_NORMAL);
+            mSensorManager.registerListener(SuperviseHumanActivityService.this, mStepDetectorSensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     private void unregisterSensors() {
         if (mLinearAcceleration != null)
-            mSensorManager.unregisterListener(StepCountService.this, mLinearAcceleration);
+            mSensorManager.unregisterListener(SuperviseHumanActivityService.this, mLinearAcceleration);
 
         if (mAccelerometer != null)
-            mSensorManager.unregisterListener(StepCountService.this, mAccelerometer);
+            mSensorManager.unregisterListener(SuperviseHumanActivityService.this, mAccelerometer);
 
         if (mGyroscope != null)
-            mSensorManager.unregisterListener(StepCountService.this, mGyroscope);
+            mSensorManager.unregisterListener(SuperviseHumanActivityService.this, mGyroscope);
 
         if (mStepCounter != null)
-            mSensorManager.unregisterListener(StepCountService.this, mStepCounter);
+            mSensorManager.unregisterListener(SuperviseHumanActivityService.this, mStepCounter);
 
         if (mStepDetectorSensor != null)
-            mSensorManager.unregisterListener(StepCountService.this, mStepDetectorSensor);
+            mSensorManager.unregisterListener(SuperviseHumanActivityService.this, mStepDetectorSensor);
     }
 
     public void startForegroundService() {
@@ -277,20 +241,25 @@ public class StepCountService extends Service implements SensorEventListener, St
         elapsedTime = elapsedTime + timeInMilliseconds;
     }
 
-    public void resetCount() {
-        stepCount = 0;
+    public void resetData() {
+        amountOfSteps = 0;
+        walkingSteps = joggingSteps = downstairsSteps = upstairsSteps = 0;
+        totalCaloriesBurned = 0;
         totalDistance = 0;
+        totalDuration = 0;
+
+        activeTime = relaxTime = 0;
+
         startTime = SystemClock.uptimeMillis();
         updatedTime = elapsedTime;
     }
 
     private Notification getNotification(String title, String body) {
-
-        Intent resetIntent = new Intent(this, StepCountService.class);
+        Intent resetIntent = new Intent(this, SuperviseHumanActivityService.class);
         resetIntent.setAction(Constants.RESET_COUNT);
         PendingIntent resetPendingIntent = PendingIntent.getService(this, 0, resetIntent, 0);
 
-        Intent stopIntent = new Intent(this, StepCountService.class);
+        Intent stopIntent = new Intent(this, SuperviseHumanActivityService.class);
         resetIntent.setAction(Constants.STOP_SAVE_COUNT);
         PendingIntent stopPendingIntent = PendingIntent.getService(this, 0, stopIntent, 0);
 
@@ -345,63 +314,47 @@ public class StepCountService extends Service implements SensorEventListener, St
         float hours = totalDuration / 3600;
         float minutes = (totalDuration % 3600) / 60;
         float seconds = totalDuration % 60;
-        String duration = String.format(Locale.ENGLISH,"%.0f", hours) + "h " +
+        String duration = String.format(Locale.ENGLISH, "%.0f", hours) + "h " +
                 String.format(Locale.ENGLISH, "%.0f", minutes) + "min " +
                 String.format(Locale.ENGLISH, "%.0f", seconds) + "s";
 
         data.put("steps", String.valueOf(amountOfSteps));
         data.put("distance", String.format(getString(R.string.distance), totalDistance));
         data.put("duration", duration);
-        data.put("speed", String.format(getResources().getString(R.string.speed), speed));
         data.put("relaxTime", String.valueOf(relaxTime));
         data.put("activeTime", String.valueOf(activeTime));
         data.put("caloBurned", String.format(Locale.ENGLISH, "%.0f", totalCaloriesBurned));
         return data;
     }
 
-    //Calculates the number of steps and the other calculations related to them
-    private void countSteps(int step) {
-        //Step count
-        stepCount += step;
-
-        //Distance calculation
-        totalDistance = (float) (stepCount * 0.8); //Average step length in an average adult
-    }
-
-    //Calculated the amount of steps taken per minute at the current rate
-    private void calculateSpeed(long eventTimeStamp, int steps) {
-        long timestampDifference = eventTimeStamp - stepTimestamp;
-        stepTimestamp = eventTimeStamp;
-        double stepTime = timestampDifference / 1000000000.0;
-        speed = (int) (60 / stepTime);
-    }
-
-    private void calculateResults(){
-        totalDistance = walkingSteps * 0.5f + joggingSteps * 1.0f + runningSteps * 1.5f;
-        totalDuration = walkingSteps * 1.0f + joggingSteps * 0.75f + runningSteps * 0.5f;
-        totalCaloriesBurned = walkingSteps + 0.05f + joggingSteps * 0.1f + runningSteps * 0.2f;
+    private void calculateResults() {
+        totalDistance = walkingSteps * 0.5f  + joggingSteps * 1.5f + (upstairsSteps + downstairsSteps) * 0.2f;
+        totalDuration = walkingSteps * 1.0f + joggingSteps * 0.5f + (upstairsSteps + downstairsSteps) * 1.0f;
+        totalCaloriesBurned = walkingSteps + 0.05f + joggingSteps * 0.2f + upstairsSteps * 0.1f + downstairsSteps * 0.05f;
     }
 
     @Override
     public void step(AccelerationData accelerationData, StepType stepType) {
         amountOfSteps++;
-        if (stepType == StepType.WALKING) {
+        if (curState == HumanActivity.WALKING) {
             walkingSteps++;
-        } else if (stepType == StepType.JOGGING) {
+        } else if (curState == HumanActivity.JOGGING) {
             joggingSteps++;
-        } else {
-            runningSteps++;
+        } else if (curState == HumanActivity.UPSTAIRS) {
+            upstairsSteps++;
+        } else if (curState == HumanActivity.DOWNSTAIRS) {
+            downstairsSteps++;
         }
     }
 
     public class MyBinder extends Binder {
-        private StepCountService service;
+        private SuperviseHumanActivityService service;
 
         public MyBinder() {
-            this.service = StepCountService.this;
+            this.service = SuperviseHumanActivityService.this;
         }
 
-        public StepCountService getService() {
+        public SuperviseHumanActivityService getService() {
             return service;
         }
     }
@@ -413,7 +366,6 @@ public class StepCountService extends Service implements SensorEventListener, St
             updatedTime = elapsedTime + timeInMilliseconds;
             Notification notification = updateNotification();
             startForeground(notification_id, notification);
-//            Log.d(TAG, timeString);
             activityPrediction();
             calculateResults();
             handler.postDelayed(this, 1000);

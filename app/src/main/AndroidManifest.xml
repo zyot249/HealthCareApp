@@ -23,7 +23,7 @@
         android:theme="@style/Theme.HealthCareApp"
         tools:ignore="GoogleAppIndexingWarning">
 
-        <service android:name=".services.StepCountService"
+        <service android:name=".services.SuperviseHumanActivityService"
             android:enabled="true"
             android:exported="true"/>
 

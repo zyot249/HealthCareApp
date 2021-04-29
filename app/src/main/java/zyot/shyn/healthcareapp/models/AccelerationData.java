@@ -1,10 +1,6 @@
 package zyot.shyn.healthcareapp.models;
 
-/**
- *
- */
 public class AccelerationData {
-
     private double value;
     private float x;
     private float y;

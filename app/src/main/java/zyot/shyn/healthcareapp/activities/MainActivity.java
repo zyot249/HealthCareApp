@@ -29,7 +29,7 @@ import zyot.shyn.healthcareapp.R;
 import zyot.shyn.healthcareapp.base.BaseActivity;
 import zyot.shyn.healthcareapp.base.Constants;
 import zyot.shyn.healthcareapp.models.User;
-import zyot.shyn.healthcareapp.services.StepCountService;
+import zyot.shyn.healthcareapp.services.SuperviseHumanActivityService;
 
 public class MainActivity extends BaseActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -88,7 +88,7 @@ public class MainActivity extends BaseActivity {
             }
         });
 
-        Intent startIntent = new Intent(this, StepCountService.class);
+        Intent startIntent = new Intent(this, SuperviseHumanActivityService.class);
         startIntent.setAction(Constants.START_FOREGROUND);
         startService(startIntent);
     }
@@ -115,7 +115,7 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Intent stopIntent = new Intent(this, StepCountService.class);
+        Intent stopIntent = new Intent(this, SuperviseHumanActivityService.class);
         stopIntent.setAction(Constants.STOP_FOREGROUND);
         startService(stopIntent);
     }

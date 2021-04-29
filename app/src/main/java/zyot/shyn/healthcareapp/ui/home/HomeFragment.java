@@ -29,7 +29,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import java.util.HashMap;
 
 import zyot.shyn.healthcareapp.R;
-import zyot.shyn.healthcareapp.services.StepCountService;
+import zyot.shyn.healthcareapp.services.SuperviseHumanActivityService;
 import zyot.shyn.healthcareapp.utils.MyString;
 
 public class HomeFragment extends Fragment implements View.OnClickListener {
@@ -48,7 +48,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private TextView heartRateTxt;
 
     private Handler handler = new Handler();
-    private StepCountService service = null;
+    private SuperviseHumanActivityService service = null;
     private boolean isBound;
 
 
@@ -89,7 +89,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onResume() {
         super.onResume();
-        Intent intent = new Intent(getActivity(), StepCountService.class);
+        Intent intent = new Intent(getActivity(), SuperviseHumanActivityService.class);
         getActivity().bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
         handler.postDelayed(timerRunnable, 0);
     }
@@ -175,7 +175,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder binder_service) {
-            StepCountService.MyBinder myBinder = (StepCountService.MyBinder) binder_service;
+            SuperviseHumanActivityService.MyBinder myBinder = (SuperviseHumanActivityService.MyBinder) binder_service;
             service = myBinder.getService();
             isBound = true;
             if (checkSensors())
