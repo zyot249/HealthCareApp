@@ -335,15 +335,18 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
 
     @Override
     public void step(AccelerationData accelerationData, StepType stepType) {
-        amountOfSteps++;
         if (curState == HumanActivity.WALKING) {
             walkingSteps++;
+            amountOfSteps++;
         } else if (curState == HumanActivity.JOGGING) {
             joggingSteps++;
+            amountOfSteps++;
         } else if (curState == HumanActivity.UPSTAIRS) {
             upstairsSteps++;
+            amountOfSteps++;
         } else if (curState == HumanActivity.DOWNSTAIRS) {
             downstairsSteps++;
+            amountOfSteps++;
         }
     }
 

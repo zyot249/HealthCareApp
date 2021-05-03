@@ -29,7 +29,7 @@ public class LauncherActivity extends BaseActivity {
             public void run() {
                 Intent intent;
                 if (password.equals("")) { // nếu không có pass
-                    intent = new Intent(LauncherActivity.this, MainActivity.class);
+                    intent = new Intent(LauncherActivity.this, SignInActivity.class);
                 } else { // nếu có pass
                     // start LockScreen
                     intent = new Intent(LauncherActivity.this, MainActivity.class);
