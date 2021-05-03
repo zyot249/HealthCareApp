@@ -1,4 +1,4 @@
-package zyot.shyn.healthcareapp.services;
+package zyot.shyn.healthcareapp.service;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -31,9 +31,9 @@ import java.util.Locale;
 import zyot.shyn.HARClassifier;
 import zyot.shyn.HumanActivity;
 import zyot.shyn.healthcareapp.R;
-import zyot.shyn.healthcareapp.activities.MainActivity;
+import zyot.shyn.healthcareapp.activity.MainActivity;
 import zyot.shyn.healthcareapp.base.Constants;
-import zyot.shyn.healthcareapp.models.AccelerationData;
+import zyot.shyn.healthcareapp.model.AccelerationData;
 
 public class SuperviseHumanActivityService extends Service implements SensorEventListener, StepListener {
     private static final String TAG = SuperviseHumanActivityService.class.getSimpleName();

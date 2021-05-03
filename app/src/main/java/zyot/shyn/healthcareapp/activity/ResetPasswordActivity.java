@@ -1,4 +1,4 @@
-package zyot.shyn.healthcareapp.activities;
+package zyot.shyn.healthcareapp.activity;
 
 import android.content.Intent;
 import android.os.Bundle;

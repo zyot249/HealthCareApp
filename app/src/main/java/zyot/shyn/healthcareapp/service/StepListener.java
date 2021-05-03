@@ -1,6 +1,6 @@
-package zyot.shyn.healthcareapp.services;
+package zyot.shyn.healthcareapp.service;
 
-import zyot.shyn.healthcareapp.models.AccelerationData;
+import zyot.shyn.healthcareapp.model.AccelerationData;
 
 public interface StepListener {
 

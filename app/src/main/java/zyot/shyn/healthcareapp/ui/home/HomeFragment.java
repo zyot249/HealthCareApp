@@ -29,7 +29,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import java.util.HashMap;
 
 import zyot.shyn.healthcareapp.R;
-import zyot.shyn.healthcareapp.services.SuperviseHumanActivityService;
+import zyot.shyn.healthcareapp.service.SuperviseHumanActivityService;
 import zyot.shyn.healthcareapp.utils.MyString;
 
 public class HomeFragment extends Fragment implements View.OnClickListener {

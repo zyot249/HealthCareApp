@@ -1,4 +1,4 @@
-package zyot.shyn.healthcareapp.models;
+package zyot.shyn.healthcareapp.model;
 
 public class Steps {
     private String date;

@@ -1,4 +1,4 @@
-package zyot.shyn.healthcareapp.activities;
+package zyot.shyn.healthcareapp.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -20,7 +20,7 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import zyot.shyn.healthcareapp.R;
 import zyot.shyn.healthcareapp.base.BaseActivity;
-import zyot.shyn.healthcareapp.models.User;
+import zyot.shyn.healthcareapp.model.User;
 import zyot.shyn.healthcareapp.utils.MyString;
 
 public class SignUpActivity extends BaseActivity {

@@ -1,4 +1,4 @@
-package zyot.shyn.healthcareapp.activities;
+package zyot.shyn.healthcareapp.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -28,8 +28,8 @@ import com.google.firebase.database.ValueEventListener;
 import zyot.shyn.healthcareapp.R;
 import zyot.shyn.healthcareapp.base.BaseActivity;
 import zyot.shyn.healthcareapp.base.Constants;
-import zyot.shyn.healthcareapp.models.User;
-import zyot.shyn.healthcareapp.services.SuperviseHumanActivityService;
+import zyot.shyn.healthcareapp.model.User;
+import zyot.shyn.healthcareapp.service.SuperviseHumanActivityService;
 
 public class MainActivity extends BaseActivity {
     private static final String TAG = MainActivity.class.getSimpleName();

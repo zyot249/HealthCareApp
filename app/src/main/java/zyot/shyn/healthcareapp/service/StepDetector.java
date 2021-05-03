@@ -1,4 +1,4 @@
-package zyot.shyn.healthcareapp.services;
+package zyot.shyn.healthcareapp.service;
 
 import android.os.SystemClock;
 
@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-import zyot.shyn.healthcareapp.models.AccelerationData;
+import zyot.shyn.healthcareapp.model.AccelerationData;
 
 public class StepDetector {
 
