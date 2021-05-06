@@ -18,4 +18,12 @@
     <color name="ecolor2">#a2bfbd</color>
     <color name="ecolor3">#ffcea2</color>
     <color name="bg">#e9f4f8</color>
+
+    <color name="walking_color">#F44336</color>
+    <color name="upstairs_color">#E91E63</color>
+    <color name="standing_color">#9C27B0</color>
+    <color name="sitting_color">#673AB7</color>
+    <color name="jogging_color">#3F51B5</color>
+    <color name="downstairs_color">#2196F3</color>
+    <color name="biking_color">#FFEB3B</color>
 </resources>

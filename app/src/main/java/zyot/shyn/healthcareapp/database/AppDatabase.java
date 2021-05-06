@@ -9,7 +9,11 @@ import androidx.room.RoomDatabase;
 import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
-@Database(entities = {}, version = 1, exportSchema = false)
+import zyot.shyn.healthcareapp.dao.UserActivityDao;
+import zyot.shyn.healthcareapp.entity.UserActivityEntity;
+
+@Database(entities = {UserActivityEntity.class},
+        version = 1, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
     private static volatile AppDatabase instance;
 
@@ -44,4 +48,6 @@ public abstract class AppDatabase extends RoomDatabase {
                     super.onCreate(db);
                 }
             };
+
+    public abstract UserActivityDao userActivityDao();
 }

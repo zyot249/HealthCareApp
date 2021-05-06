@@ -17,9 +17,8 @@ allprojects {
     repositories {
         google()
         jcenter()
-        maven {
-            url  "https://zyot.bintray.com/android_har"
-        }
+        maven { url "https://zyot.bintray.com/android_har" }
+        maven { url 'https://jitpack.io' }
     }
 }
 
@@ -28,6 +27,6 @@ task clean(type: Delete) {
 }
 
 ext {
-    roomVersion = '2.1.0-alpha03'
-    paging_version = "2.1.0-rc01"
+    room_version = '2.3.0'
+    paging_version = "2.1.2"
 }

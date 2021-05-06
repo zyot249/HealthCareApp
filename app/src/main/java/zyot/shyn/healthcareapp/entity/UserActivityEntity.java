@@ -13,6 +13,15 @@ public class UserActivityEntity implements Serializable {
     private int activity;
     private long duration;
 
+    public UserActivityEntity() {
+    }
+
+    public UserActivityEntity(long timestamp, int activity, long duration) {
+        this.timestamp = timestamp;
+        this.activity = activity;
+        this.duration = duration;
+    }
+
     public long getTimestamp() {
         return timestamp;
     }

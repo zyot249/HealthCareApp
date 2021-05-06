@@ -5,6 +5,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
@@ -14,6 +15,7 @@ import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -22,12 +24,33 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.github.mikephil.charting.animation.Easing;
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
+import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TimeZone;
 
+import zyot.shyn.HumanActivity;
 import zyot.shyn.healthcareapp.R;
 import zyot.shyn.healthcareapp.service.SuperviseHumanActivityService;
 import zyot.shyn.healthcareapp.utils.MyString;
@@ -46,11 +69,15 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private TextView timeTxt;
     private TextView spo2Txt;
     private TextView heartRateTxt;
+    private TextView curStateTxt;
+
+    private Button loadBtn;
+
+    private LineChart activityLineChart;
 
     private Handler handler = new Handler();
     private SuperviseHumanActivityService service = null;
     private boolean isBound;
-
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -73,6 +100,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         timeTxt = view.findViewById(R.id.time_txt);
         spo2Txt = view.findViewById(R.id.spo2_txt);
         heartRateTxt = view.findViewById(R.id.heart_rate_txt);
+        curStateTxt = view.findViewById(R.id.cur_state_txt);
+        activityLineChart = view.findViewById(R.id.activity_line_chart);
+        configureLineChart();
+
+        loadBtn = view.findViewById(R.id.load_btn);
 
         homeViewModel.getWeight().observe(getViewLifecycleOwner(), s -> weightTxt.setText(s));
         homeViewModel.getHeight().observe(getViewLifecycleOwner(), s -> heightTxt.setText(s));
@@ -81,9 +113,26 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         homeViewModel.getTime().observe(getViewLifecycleOwner(), s -> timeTxt.setText(s));
         homeViewModel.getSpo2().observe(getViewLifecycleOwner(), s -> spo2Txt.setText(s));
         homeViewModel.getHeartRate().observe(getViewLifecycleOwner(), s -> heartRateTxt.setText(s));
+        homeViewModel.getCurState().observe(getViewLifecycleOwner(), s -> curStateTxt.setText(s));
+        homeViewModel.getActivityData().observe(getViewLifecycleOwner(), data -> {
+            List<Entry> dataList = new ArrayList<>();
+            data.entrySet().stream()
+                    .sorted(Map.Entry.comparingByKey())
+                    .forEach(entry -> dataList.add(new Entry(entry.getKey(), entry.getValue())));
+            LineDataSet dataSet = new LineDataSet(dataList, "Activity");
+            dataSet.setLineWidth(1);
+            dataSet.setDrawFilled(true);
+            dataSet.setDrawValues(false);
+            dataSet.setMode(LineDataSet.Mode.STEPPED);
+            LineData lineData = new LineData(dataSet);
+            activityLineChart.setData(lineData);
+            activityLineChart.moveViewToX(activityLineChart.getXChartMax());
+            activityLineChart.invalidate();
+        });
 
         heightView.setOnClickListener(this);
         weightView.setOnClickListener(this);
+        loadBtn.setOnClickListener(this);
     }
 
     @Override
@@ -99,25 +148,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         super.onPause();
         getActivity().unbindService(mServiceConnection);
         handler.removeCallbacks(timerRunnable);
-    }
-
-    private boolean checkSensors() {
-        SensorManager sensorManager;
-        Sensor stepDetectorSensor;
-        Sensor stepCounter;
-
-        sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
-        stepDetectorSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR);
-        stepCounter = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
-
-        if (stepCounter != null) {
-            return true;
-        } else if (stepDetectorSensor != null) {
-            return true;
-        } else {
-//            notices.setText(" Step Counter and Step Detector Sensor not available \n cannot calculate Steps , Sorry . ");
-            return false;
-        }
     }
 
     @Override
@@ -152,6 +182,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
                         }).show();
                 break;
+            case R.id.load_btn:
+                service.loadData();
+                break;
         }
     }
 
@@ -167,6 +200,47 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         return dialogBuilder;
     }
 
+    private void configureLineChart() {
+        XAxis xAxis = activityLineChart.getXAxis();
+        xAxis.setLabelCount(6, true);
+        xAxis.setTextColor(Color.WHITE);
+        xAxis.setSpaceMax(5);
+        xAxis.setValueFormatter(new ValueFormatter() {
+            private final SimpleDateFormat mFormat = new SimpleDateFormat("HH:mm:ss");
+
+            @Override
+            public String getFormattedValue(float value) {
+                Calendar calendar = Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault());
+                calendar.set(Calendar.SECOND, 0);
+                calendar.set(Calendar.MILLISECOND, 0);
+                calendar.set(Calendar.MINUTE, 0);
+                calendar.set(Calendar.HOUR, 0);
+                long startTimeOfDate = calendar.getTimeInMillis();
+                long millis = startTimeOfDate + (long) value * 1000L;
+                return mFormat.format(new Date(millis));
+            }
+        });
+
+        YAxis yAxisLeft = activityLineChart.getAxisLeft();
+        yAxisLeft.setAxisMinimum(0);
+        yAxisLeft.setAxisMaximum(6);
+        yAxisLeft.setTextColor(Color.WHITE);
+        yAxisLeft.setValueFormatter(new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value) {
+                return HumanActivity.getHumanActivity((int) value).toString();
+            }
+        });
+        activityLineChart.getLegend().setTextColor(Color.WHITE);
+        activityLineChart.getDescription().setEnabled(false);
+        activityLineChart.getAxisRight().setEnabled(false);
+        activityLineChart.getAxisRight().setDrawGridLines(false);
+        activityLineChart.enableScroll();
+        activityLineChart.setScaleYEnabled(false);
+
+        activityLineChart.invalidate();
+    }
+
     private ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceDisconnected(ComponentName name) {
@@ -178,8 +252,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             SuperviseHumanActivityService.MyBinder myBinder = (SuperviseHumanActivityService.MyBinder) binder_service;
             service = myBinder.getService();
             isBound = true;
-            if (checkSensors())
-                service.startForegroundService();
+            service.startForegroundService();
         }
     };
 
@@ -197,6 +270,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                     homeViewModel.setCalo(data.get("caloBurned"));
                     homeViewModel.setSpo2(data.get("relaxTime"));
                     homeViewModel.setHeartRate(data.get("activeTime"));
+                    homeViewModel.setCurState(data.get("curState"));
+                    homeViewModel.setActivityData(service.getUserActivityData());
                 }
             }
             handler.postDelayed(this, 1000);

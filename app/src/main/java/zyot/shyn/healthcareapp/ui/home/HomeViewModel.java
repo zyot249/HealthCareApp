@@ -4,6 +4,8 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import java.util.HashMap;
+
 public class HomeViewModel extends ViewModel {
     private MutableLiveData<String> weight;
     private MutableLiveData<String> height;
@@ -14,6 +16,9 @@ public class HomeViewModel extends ViewModel {
 
     private MutableLiveData<String> spo2;
     private MutableLiveData<String> heartRate;
+
+    private MutableLiveData<String> curState;
+    private MutableLiveData<HashMap<Float, Integer>> activityData;
 
     public HomeViewModel() {
         weight = new MutableLiveData<>();
@@ -30,6 +35,10 @@ public class HomeViewModel extends ViewModel {
         spo2.setValue("0");
         heartRate = new MutableLiveData<>();
         heartRate.setValue("0");
+        curState = new MutableLiveData<>();
+        curState.setValue("");
+        activityData = new MutableLiveData<>();
+        activityData.setValue(new HashMap<>());
     }
 
     public LiveData<String> getWeight() {
@@ -60,6 +69,14 @@ public class HomeViewModel extends ViewModel {
         return heartRate;
     }
 
+    public LiveData<HashMap<Float, Integer>> getActivityData() {
+        return activityData;
+    }
+
+    public LiveData<String> getCurState() {
+        return curState;
+    }
+
     public void setWeight(String w) {
         weight.setValue(w);
     }
@@ -86,5 +103,13 @@ public class HomeViewModel extends ViewModel {
 
     public void setHeartRate(String heartRate) {
         this.heartRate.setValue(heartRate);
+    }
+
+    public void setActivityData(HashMap<Float, Integer> data) {
+        this.activityData.setValue(data);
+    }
+
+    public void setCurState(String state) {
+        this.curState.setValue(state);
     }
 }

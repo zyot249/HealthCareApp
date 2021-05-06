@@ -24,22 +24,29 @@ import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 import zyot.shyn.HARClassifier;
 import zyot.shyn.HumanActivity;
 import zyot.shyn.healthcareapp.R;
 import zyot.shyn.healthcareapp.activity.MainActivity;
 import zyot.shyn.healthcareapp.base.Constants;
+import zyot.shyn.healthcareapp.entity.UserActivityEntity;
 import zyot.shyn.healthcareapp.model.AccelerationData;
+import zyot.shyn.healthcareapp.repository.UserActivityRepository;
 
 public class SuperviseHumanActivityService extends Service implements SensorEventListener, StepListener {
     private static final String TAG = SuperviseHumanActivityService.class.getSimpleName();
     //Sensors
     private SensorManager mSensorManager;
-    private Sensor mAccelerometer, mGyroscope, mLinearAcceleration, mStepCounter, mStepDetectorSensor;
+    private Sensor mAccelerometer, mGyroscope, mLinearAcceleration;
 
     private long startTime = 0;
     long timeInMilliseconds = 0;
@@ -58,9 +65,11 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
     private int walkingSteps, joggingSteps, downstairsSteps, upstairsSteps;
     private float totalCaloriesBurned = 0, totalDuration = 0, totalDistance = 0;
 
-    private long lastTimeActPrediction = 0;
+    private long lastTimeActPrediction = 0, startTimeOfCurState = 0;
+    private long prevActivityDuration = 0;
     private HumanActivity curState = HumanActivity.UNKNOWN;
     private long activeTime = 0, relaxTime = 0;
+    private HashMap<Float, Integer> userActivityData;
 
     private boolean isActive = false;
 
@@ -69,6 +78,10 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
     int notification_id = 1711101;
 
     private IBinder mBinder = new MyBinder();
+
+    // repository
+    private final CompositeDisposable disposable = new CompositeDisposable();
+    private UserActivityRepository userActivityRepository;
 
     @Override
     public void onCreate() {
@@ -84,15 +97,18 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         mLinearAcceleration = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
-        mStepCounter = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
-        mStepDetectorSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR);
 
-        lastTimeActPrediction = System.currentTimeMillis();
+        Calendar calendar = Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault());
+        lastTimeActPrediction = startTimeOfCurState = calendar.getTimeInMillis();
 
         classifier = new HARClassifier(getApplicationContext());
 
         stepDetector = new StepDetector();
         stepDetector.registerStepListener(this);
+
+        userActivityData = new HashMap<>();
+
+        userActivityRepository = UserActivityRepository.getInstance(getApplication());
     }
 
     @Override
@@ -141,6 +157,7 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
     @Override
     public void onDestroy() {
         super.onDestroy();
+        disposable.clear();
     }
 
     @Override
@@ -174,13 +191,29 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
     private void activityPrediction() {
         int index = classifier.predictHumanActivity(ax, ay, az, lx, ly, lz, gx, gy, gz);
         if (index != -1) {
-            long now = System.currentTimeMillis();
-            if (index == 3 || index == 4) {
-                relaxTime += (now - lastTimeActPrediction);
-            } else {
-                activeTime += (now - lastTimeActPrediction);
+            Calendar calendar = Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault());
+            long now = calendar.getTimeInMillis();
+
+            HumanActivity state = HumanActivity.getHumanActivity(index);
+            prevActivityDuration = now - startTimeOfCurState;
+            if (state != curState) {
+                UserActivityEntity userActivityEntity = new UserActivityEntity(startTimeOfCurState, curState.getIndex(), prevActivityDuration);
+                userActivityRepository.saveUserActivity(userActivityEntity)
+                        .subscribeOn(Schedulers.io())
+                        .subscribe();
+
+                startTimeOfCurState = lastTimeActPrediction;
+                curState = state;
+
+                calendar.set(Calendar.SECOND, 0);
+                calendar.set(Calendar.MILLISECOND, 0);
+                calendar.set(Calendar.MINUTE, 0);
+                calendar.set(Calendar.HOUR, 0);
+                long startTimeOfDate = calendar.getTimeInMillis();
+                float timePointInDayOfState = (float) (startTimeOfCurState - startTimeOfDate) / 1000;
+
+                userActivityData.put(timePointInDayOfState, curState.getIndex());
             }
-            curState = HumanActivity.getHumanActivity(index);
             lastTimeActPrediction = now;
         }
     }
@@ -199,12 +232,6 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
 
         if (mGyroscope != null)
             mSensorManager.registerListener(SuperviseHumanActivityService.this, mGyroscope, SensorManager.SENSOR_DELAY_FASTEST);
-
-        if (mStepCounter != null)
-            mSensorManager.registerListener(SuperviseHumanActivityService.this, mStepCounter, SensorManager.SENSOR_DELAY_NORMAL);
-
-        if (mStepDetectorSensor != null)
-            mSensorManager.registerListener(SuperviseHumanActivityService.this, mStepDetectorSensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     private void unregisterSensors() {
@@ -216,12 +243,6 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
 
         if (mGyroscope != null)
             mSensorManager.unregisterListener(SuperviseHumanActivityService.this, mGyroscope);
-
-        if (mStepCounter != null)
-            mSensorManager.unregisterListener(SuperviseHumanActivityService.this, mStepCounter);
-
-        if (mStepDetectorSensor != null)
-            mSensorManager.unregisterListener(SuperviseHumanActivityService.this, mStepDetectorSensor);
     }
 
     public void startForegroundService() {
@@ -324,11 +345,24 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
         data.put("relaxTime", String.valueOf(relaxTime));
         data.put("activeTime", String.valueOf(activeTime));
         data.put("caloBurned", String.format(Locale.ENGLISH, "%.0f", totalCaloriesBurned));
+        data.put("curState", curState.toString());
         return data;
     }
 
+    public HashMap<Float, Integer> getUserActivityData() {
+        return userActivityData;
+    }
+
+    public void loadData() {
+        userActivityRepository.getUserActivityDataInDay(new Date())
+                .subscribeOn(Schedulers.io())
+                .subscribe(data -> {
+                    Log.d(TAG, "size " + data.size());
+                });
+    }
+
     private void calculateResults() {
-        totalDistance = walkingSteps * 0.5f  + joggingSteps * 1.5f + (upstairsSteps + downstairsSteps) * 0.2f;
+        totalDistance = walkingSteps * 0.5f + joggingSteps * 1.5f + (upstairsSteps + downstairsSteps) * 0.2f;
         totalDuration = walkingSteps * 1.0f + joggingSteps * 0.5f + (upstairsSteps + downstairsSteps) * 1.0f;
         totalCaloriesBurned = walkingSteps + 0.05f + joggingSteps * 0.2f + upstairsSteps * 0.1f + downstairsSteps * 0.05f;
     }
