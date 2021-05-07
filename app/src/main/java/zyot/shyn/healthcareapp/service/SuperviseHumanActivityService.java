@@ -98,8 +98,7 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
         mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         mLinearAcceleration = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
 
-        Calendar calendar = Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault());
-        lastTimeActPrediction = startTimeOfCurState = calendar.getTimeInMillis();
+        lastTimeActPrediction = startTimeOfCurState = MyDateTimeUtils.getCurrentTimestamp();
 
         classifier = new HARClassifier(getApplicationContext());
 
@@ -240,6 +239,8 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
 
         activeTime = relaxTime = 0;
 
+        userActivityData.clear();
+
         startTime = SystemClock.uptimeMillis();
         updatedTime = elapsedTime;
     }
@@ -303,7 +304,7 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
         if (index != -1) {
             long now = MyDateTimeUtils.getCurrentTimestamp();
             if (MyDateTimeUtils.getDiffDays(now, lastTimeActPrediction) > 0)
-                userActivityData.clear();
+                resetData();
             HumanActivity state = HumanActivity.getHumanActivity(index);
             prevActivityDuration = now - startTimeOfCurState;
             if (state != curState) {
