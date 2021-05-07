@@ -23,13 +23,6 @@ public class ReportFragment extends Fragment {
         reportViewModel =
                 new ViewModelProvider(this).get(ReportViewModel.class);
         View root = inflater.inflate(R.layout.fragment_report, container, false);
-        final TextView textView = root.findViewById(R.id.text_report);
-        reportViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
-            @Override
-            public void onChanged(@Nullable String s) {
-                textView.setText(s);
-            }
-        });
         return root;
     }
 }

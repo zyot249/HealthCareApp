@@ -10,9 +10,12 @@ import java.util.TimeZone;
 
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
+import io.reactivex.Maybe;
+import io.reactivex.Single;
 import zyot.shyn.healthcareapp.dao.UserActivityDao;
 import zyot.shyn.healthcareapp.database.AppDatabase;
 import zyot.shyn.healthcareapp.entity.UserActivityEntity;
+import zyot.shyn.healthcareapp.utils.MyDateTimeUtils;
 
 public class UserActivityRepository {
     private static final String TAG = UserActivityRepository.class.getSimpleName();
@@ -40,15 +43,15 @@ public class UserActivityRepository {
         return userActivityDao.insert(userActivityEntity);
     }
 
-    public Flowable<List<UserActivityEntity>> getUserActivityDataInDay(Date date) {
-        Calendar calendar = Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault());
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.HOUR, 0);
-        long startTime = calendar.getTimeInMillis();
-        calendar.set(Calendar.DATE, calendar.get(Calendar.DATE) + 1);
-        long endTime = calendar.getTimeInMillis();
+    public Maybe<List<UserActivityEntity>> getUserActivityDataInDay(int year, int month, int date) {
+        long startTime = MyDateTimeUtils.getStartTimeOfDate(year, month, date);
+        long endTime = startTime + MyDateTimeUtils.MILLISECONDS_PER_DAY;
         return userActivityDao.getUserActivityDataBetween(startTime, endTime);
+    }
+
+    public Maybe<List<UserActivityEntity>> getUserActivityDataInDay(long timestamp) {
+        long startTime = MyDateTimeUtils.getStartTimeOfDate(timestamp);
+        long endTime = startTime + MyDateTimeUtils.MILLISECONDS_PER_DAY;
+        return userActivityDao.getUserActivityDataBetween(startTime, endTime - 1);
     }
 }

@@ -6,8 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Color;
-import android.hardware.Sensor;
-import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -24,24 +22,19 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.ValueFormatter;
-import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
-import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -53,7 +46,8 @@ import java.util.TimeZone;
 import zyot.shyn.HumanActivity;
 import zyot.shyn.healthcareapp.R;
 import zyot.shyn.healthcareapp.service.SuperviseHumanActivityService;
-import zyot.shyn.healthcareapp.utils.MyString;
+import zyot.shyn.healthcareapp.utils.MyDateTimeUtils;
+import zyot.shyn.healthcareapp.utils.MyStringUtils;
 
 public class HomeFragment extends Fragment implements View.OnClickListener {
 
@@ -70,8 +64,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private TextView spo2Txt;
     private TextView heartRateTxt;
     private TextView curStateTxt;
-
-    private Button loadBtn;
 
     private LineChart activityLineChart;
 
@@ -104,8 +96,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         activityLineChart = view.findViewById(R.id.activity_line_chart);
         configureLineChart();
 
-        loadBtn = view.findViewById(R.id.load_btn);
-
         homeViewModel.getWeight().observe(getViewLifecycleOwner(), s -> weightTxt.setText(s));
         homeViewModel.getHeight().observe(getViewLifecycleOwner(), s -> heightTxt.setText(s));
         homeViewModel.getSteps().observe(getViewLifecycleOwner(), s -> footStepsTxt.setText(s));
@@ -132,7 +122,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
         heightView.setOnClickListener(this);
         weightView.setOnClickListener(this);
-        loadBtn.setOnClickListener(this);
     }
 
     @Override
@@ -159,7 +148,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                             Dialog dialogObj = (Dialog) dialog;
                             EditText weightEt = dialogObj.findViewById(R.id.dialog_et);
                             String weight = weightEt.getText().toString();
-                            if (MyString.isNotEmpty(weight)) {
+                            if (MyStringUtils.isNotEmpty(weight)) {
                                 homeViewModel.setWeight(weight);
                             }
                         })
@@ -174,16 +163,13 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                             Dialog dialogObj = (Dialog) dialog;
                             EditText weightEt = dialogObj.findViewById(R.id.dialog_et);
                             String height = weightEt.getText().toString();
-                            if (MyString.isNotEmpty(height)) {
+                            if (MyStringUtils.isNotEmpty(height)) {
                                 homeViewModel.setHeight(height);
                             }
                         })
                         .setNegativeButton("Cancel", (dialog, which) -> {
 
                         }).show();
-                break;
-            case R.id.load_btn:
-                service.loadData();
                 break;
         }
     }
@@ -210,12 +196,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
             @Override
             public String getFormattedValue(float value) {
-                Calendar calendar = Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault());
-                calendar.set(Calendar.SECOND, 0);
-                calendar.set(Calendar.MILLISECOND, 0);
-                calendar.set(Calendar.MINUTE, 0);
-                calendar.set(Calendar.HOUR, 0);
-                long startTimeOfDate = calendar.getTimeInMillis();
+                long startTimeOfDate = MyDateTimeUtils.getStartTimeOfCurrentDate();
                 long millis = startTimeOfDate + (long) value * 1000L;
                 return mFormat.format(new Date(millis));
             }

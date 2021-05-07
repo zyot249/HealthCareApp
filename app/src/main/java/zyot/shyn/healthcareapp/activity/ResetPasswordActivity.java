@@ -12,7 +12,7 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import zyot.shyn.healthcareapp.R;
 import zyot.shyn.healthcareapp.base.BaseActivity;
-import zyot.shyn.healthcareapp.utils.MyString;
+import zyot.shyn.healthcareapp.utils.MyStringUtils;
 
 public class ResetPasswordActivity extends BaseActivity {
     private EditText emailEt;
@@ -37,11 +37,11 @@ public class ResetPasswordActivity extends BaseActivity {
 
         resetBtn.setOnClickListener(view -> {
             final String email = emailEt.getText().toString();
-            if (MyString.isEmpty(email)) {
+            if (MyStringUtils.isEmpty(email)) {
                 Snackbar.make(resetBtn, "Please enter your email!", Snackbar.LENGTH_LONG).show();
                 return;
             }
-            if (!MyString.isValidEmail(email)) {
+            if (!MyStringUtils.isValidEmail(email)) {
                 Snackbar.make(resetBtn, "Email is not valid!", Snackbar.LENGTH_LONG).show();
                 return;
             }

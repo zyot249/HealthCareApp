@@ -21,7 +21,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import zyot.shyn.healthcareapp.R;
 import zyot.shyn.healthcareapp.base.BaseActivity;
 import zyot.shyn.healthcareapp.model.User;
-import zyot.shyn.healthcareapp.utils.MyString;
+import zyot.shyn.healthcareapp.utils.MyStringUtils;
 
 public class SignUpActivity extends BaseActivity {
     private static final String TAG = SignUpActivity.class.getSimpleName();
@@ -80,36 +80,36 @@ public class SignUpActivity extends BaseActivity {
     }
 
     private boolean validateInput(String email, String pass, String cfPass, String displayName, String age, String gender) {
-        if (MyString.isEmpty(email)) {
+        if (MyStringUtils.isEmpty(email)) {
             Snackbar.make(submitBtn, "Email is empty!", Snackbar.LENGTH_SHORT).show();
             return false;
         }
-        if (MyString.isEmpty(pass)) {
+        if (MyStringUtils.isEmpty(pass)) {
             Snackbar.make(submitBtn, "Password is empty!", Snackbar.LENGTH_SHORT).show();
             return false;
         }
-        if (MyString.isEmpty(cfPass)) {
+        if (MyStringUtils.isEmpty(cfPass)) {
             Snackbar.make(submitBtn, "Confirm password is empty!", Snackbar.LENGTH_SHORT).show();
             return false;
         }
-        if (MyString.isEmpty(displayName)) {
+        if (MyStringUtils.isEmpty(displayName)) {
             Snackbar.make(submitBtn, "Display name is empty!", Snackbar.LENGTH_SHORT).show();
             return false;
         }
-        if (MyString.isEmpty(age)) {
+        if (MyStringUtils.isEmpty(age)) {
             Snackbar.make(submitBtn, "Age is empty!", Snackbar.LENGTH_SHORT).show();
             return false;
         }
-        if (MyString.isEmpty(gender)) {
+        if (MyStringUtils.isEmpty(gender)) {
             Snackbar.make(submitBtn, "Gender is empty!", Snackbar.LENGTH_SHORT).show();
             return false;
         }
 
-        if (!MyString.isValidEmail(email)) {
+        if (!MyStringUtils.isValidEmail(email)) {
             Snackbar.make(submitBtn, "Email is not valid!", Snackbar.LENGTH_SHORT).show();
             return false;
         }
-        if (!MyString.isValidPassword(pass)) {
+        if (!MyStringUtils.isValidPassword(pass)) {
             Snackbar.make(submitBtn, "Password is not valid!", Snackbar.LENGTH_SHORT).show();
             return false;
         }

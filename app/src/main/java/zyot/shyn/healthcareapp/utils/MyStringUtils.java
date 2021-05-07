@@ -2,7 +2,7 @@ package zyot.shyn.healthcareapp.utils;
 
 import java.util.regex.Pattern;
 
-public class MyString {
+public class MyStringUtils {
     public static boolean isEmpty(String s) {
         if (s == null || s.trim().length() == 0) return true;
         return false;

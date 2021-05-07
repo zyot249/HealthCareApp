@@ -41,6 +41,7 @@ import zyot.shyn.healthcareapp.base.Constants;
 import zyot.shyn.healthcareapp.entity.UserActivityEntity;
 import zyot.shyn.healthcareapp.model.AccelerationData;
 import zyot.shyn.healthcareapp.repository.UserActivityRepository;
+import zyot.shyn.healthcareapp.utils.MyDateTimeUtils;
 
 public class SuperviseHumanActivityService extends Service implements SensorEventListener, StepListener {
     private static final String TAG = SuperviseHumanActivityService.class.getSimpleName();
@@ -80,7 +81,6 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
     private IBinder mBinder = new MyBinder();
 
     // repository
-    private final CompositeDisposable disposable = new CompositeDisposable();
     private UserActivityRepository userActivityRepository;
 
     @Override
@@ -107,8 +107,8 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
         stepDetector.registerStepListener(this);
 
         userActivityData = new HashMap<>();
-
         userActivityRepository = UserActivityRepository.getInstance(getApplication());
+        loadDataToday();
     }
 
     @Override
@@ -157,7 +157,6 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
     @Override
     public void onDestroy() {
         super.onDestroy();
-        disposable.clear();
     }
 
     @Override
@@ -185,36 +184,6 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
                 ly.add(event.values[1]);
                 lz.add(event.values[2]);
                 break;
-        }
-    }
-
-    private void activityPrediction() {
-        int index = classifier.predictHumanActivity(ax, ay, az, lx, ly, lz, gx, gy, gz);
-        if (index != -1) {
-            Calendar calendar = Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault());
-            long now = calendar.getTimeInMillis();
-
-            HumanActivity state = HumanActivity.getHumanActivity(index);
-            prevActivityDuration = now - startTimeOfCurState;
-            if (state != curState) {
-                UserActivityEntity userActivityEntity = new UserActivityEntity(startTimeOfCurState, curState.getIndex(), prevActivityDuration);
-                userActivityRepository.saveUserActivity(userActivityEntity)
-                        .subscribeOn(Schedulers.io())
-                        .subscribe();
-
-                startTimeOfCurState = lastTimeActPrediction;
-                curState = state;
-
-                calendar.set(Calendar.SECOND, 0);
-                calendar.set(Calendar.MILLISECOND, 0);
-                calendar.set(Calendar.MINUTE, 0);
-                calendar.set(Calendar.HOUR, 0);
-                long startTimeOfDate = calendar.getTimeInMillis();
-                float timePointInDayOfState = (float) (startTimeOfCurState - startTimeOfDate) / 1000;
-
-                userActivityData.put(timePointInDayOfState, curState.getIndex());
-            }
-            lastTimeActPrediction = now;
         }
     }
 
@@ -329,6 +298,31 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
         return isActive;
     }
 
+    private void activityPrediction() {
+        int index = classifier.predictHumanActivity(ax, ay, az, lx, ly, lz, gx, gy, gz);
+        if (index != -1) {
+            long now = MyDateTimeUtils.getCurrentTimestamp();
+            if (MyDateTimeUtils.getDiffDays(now, lastTimeActPrediction) > 0)
+                userActivityData.clear();
+            HumanActivity state = HumanActivity.getHumanActivity(index);
+            prevActivityDuration = now - startTimeOfCurState;
+            if (state != curState) {
+                UserActivityEntity userActivityEntity = new UserActivityEntity(startTimeOfCurState, curState.getIndex(), prevActivityDuration);
+                userActivityRepository.saveUserActivity(userActivityEntity)
+                        .subscribeOn(Schedulers.io())
+                        .subscribe();
+
+                startTimeOfCurState = lastTimeActPrediction;
+                curState = state;
+                long startTimeOfDate = MyDateTimeUtils.getStartTimeOfDate(now);
+                float timePointInDayOfState = (float) (startTimeOfCurState - startTimeOfDate) / 1000;
+
+                userActivityData.put(timePointInDayOfState, curState.getIndex());
+            }
+            lastTimeActPrediction = now;
+        }
+    }
+
     public HashMap<String, String> getData() {
         HashMap<String, String> data = new HashMap<>();
 
@@ -353,12 +347,18 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
         return userActivityData;
     }
 
-    public void loadData() {
-        userActivityRepository.getUserActivityDataInDay(new Date())
+    public void loadDataToday() {
+        final long now = MyDateTimeUtils.getCurrentTimestamp();
+        userActivityRepository.getUserActivityDataInDay(now)
                 .subscribeOn(Schedulers.io())
                 .subscribe(data -> {
                     Log.d(TAG, "size " + data.size());
-                });
+                    long startTimeOfDate = MyDateTimeUtils.getStartTimeOfDate(now);
+                    for (UserActivityEntity activityEntity : data) {
+                        float timePointInDayOfState = (float) (activityEntity.getTimestamp() - startTimeOfDate) / 1000;
+                        userActivityData.put(timePointInDayOfState, activityEntity.getActivity());
+                    }
+                }, err -> Log.d(TAG, "error: " + err.getMessage()));
     }
 
     private void calculateResults() {
