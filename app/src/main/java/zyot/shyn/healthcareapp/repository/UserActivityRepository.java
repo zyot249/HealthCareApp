@@ -2,19 +2,14 @@ package zyot.shyn.healthcareapp.repository;
 
 import android.app.Application;
 
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
 
 import io.reactivex.Completable;
-import io.reactivex.Flowable;
 import io.reactivex.Maybe;
-import io.reactivex.Single;
 import zyot.shyn.healthcareapp.dao.UserActivityDao;
 import zyot.shyn.healthcareapp.database.AppDatabase;
 import zyot.shyn.healthcareapp.entity.UserActivityEntity;
+import zyot.shyn.healthcareapp.pojo.ActivityDurationPOJO;
 import zyot.shyn.healthcareapp.utils.MyDateTimeUtils;
 
 public class UserActivityRepository {
@@ -45,13 +40,19 @@ public class UserActivityRepository {
 
     public Maybe<List<UserActivityEntity>> getUserActivityDataInDay(int year, int month, int date) {
         long startTime = MyDateTimeUtils.getStartTimeOfDate(year, month, date);
-        long endTime = startTime + MyDateTimeUtils.MILLISECONDS_PER_DAY;
+        long endTime = startTime + MyDateTimeUtils.MILLISECONDS_PER_DAY - 1;
         return userActivityDao.getUserActivityDataBetween(startTime, endTime);
     }
 
     public Maybe<List<UserActivityEntity>> getUserActivityDataInDay(long timestamp) {
         long startTime = MyDateTimeUtils.getStartTimeOfDate(timestamp);
-        long endTime = startTime + MyDateTimeUtils.MILLISECONDS_PER_DAY;
-        return userActivityDao.getUserActivityDataBetween(startTime, endTime - 1);
+        long endTime = startTime + MyDateTimeUtils.MILLISECONDS_PER_DAY - 1;
+        return userActivityDao.getUserActivityDataBetween(startTime, endTime);
+    }
+
+    public Maybe<List<ActivityDurationPOJO>> getUserActivityDurationInMonth(int year, int month) {
+        long startTime = MyDateTimeUtils.getStartTimeOfDate(year, month, 1);
+        long endTime = MyDateTimeUtils.getStartTimeOfDate(year, month + 1, 1) - 1;
+        return userActivityDao.queryTotalTimeOfEachActivityBetween(startTime, endTime);
     }
 }

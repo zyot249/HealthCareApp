@@ -10,6 +10,7 @@ import java.util.List;
 import io.reactivex.Completable;
 import io.reactivex.Maybe;
 import zyot.shyn.healthcareapp.entity.UserActivityEntity;
+import zyot.shyn.healthcareapp.pojo.ActivityDurationPOJO;
 
 @Dao
 public interface UserActivityDao {
@@ -18,4 +19,7 @@ public interface UserActivityDao {
 
     @Query("SELECT * FROM user_activity WHERE timestamp >= :startTime AND timestamp <= :endTime")
     Maybe<List<UserActivityEntity>> getUserActivityDataBetween(long startTime, long endTime);
+
+    @Query("SELECT activity, sum(duration) as totalduration FROM user_activity WHERE timestamp >= :startTime AND timestamp <= :endTime GROUP BY activity")
+    Maybe<List<ActivityDurationPOJO>> queryTotalTimeOfEachActivityBetween(long startTime, long endTime);
 }

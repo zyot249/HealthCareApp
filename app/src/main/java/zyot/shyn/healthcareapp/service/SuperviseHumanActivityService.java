@@ -303,8 +303,13 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
         int index = classifier.predictHumanActivity(ax, ay, az, lx, ly, lz, gx, gy, gz);
         if (index != -1) {
             long now = MyDateTimeUtils.getCurrentTimestamp();
-            if (MyDateTimeUtils.getDiffDays(now, lastTimeActPrediction) > 0)
+            if (MyDateTimeUtils.getDiffDays(now, lastTimeActPrediction) > 0) {
+                UserActivityEntity userActivityEntity = new UserActivityEntity(startTimeOfCurState, curState.getIndex(), prevActivityDuration);
+                userActivityRepository.saveUserActivity(userActivityEntity)
+                        .subscribeOn(Schedulers.io())
+                        .subscribe();
                 resetData();
+            }
             HumanActivity state = HumanActivity.getHumanActivity(index);
             prevActivityDuration = now - startTimeOfCurState;
             if (state != curState) {

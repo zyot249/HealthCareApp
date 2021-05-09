@@ -1,6 +1,7 @@
 package zyot.shyn.healthcareapp.entity;
 
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import java.io.Serializable;
@@ -16,6 +17,7 @@ public class UserActivityEntity implements Serializable {
     public UserActivityEntity() {
     }
 
+    @Ignore
     public UserActivityEntity(long timestamp, int activity, long duration) {
         this.timestamp = timestamp;
         this.activity = activity;

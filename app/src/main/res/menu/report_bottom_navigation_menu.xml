@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/date_page"
+        android:enabled="true"
+        android:title="Date" />
+    <item
+        android:id="@+id/month_page"
+        android:enabled="true"
+        android:title="Month" />
+</menu>

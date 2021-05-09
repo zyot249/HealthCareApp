@@ -1,12 +1,72 @@
 package zyot.shyn.healthcareapp.utils;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 public class MyDateTimeUtils {
     public static final int MILLISECONDS_PER_DAY = 86400000;
+
+    public static final String DATE_PATTERN_MEDIUM = "MMM dd, yyyy";
+    public static final String DATE_PATTERN_WITHOUT_DAY = "MMM, yyyy";
+
+    public static final SimpleDateFormat SDF_DATE_MEDIUM = new SimpleDateFormat(DATE_PATTERN_MEDIUM, Locale.getDefault());
+    public static final SimpleDateFormat SDF_DATE_WITHOUT_DAY = new SimpleDateFormat(DATE_PATTERN_WITHOUT_DAY, Locale.getDefault());
+
+    static {
+        SDF_DATE_MEDIUM.setTimeZone(TimeZone.getDefault());
+        SDF_DATE_WITHOUT_DAY.setTimeZone(TimeZone.getDefault());
+    }
+
+    public static String getDateStringMedium(Date date) {
+        return SDF_DATE_MEDIUM.format(date);
+    }
+
+    public static String getDateStringMedium(long timestamp) {
+        return getDateStringMedium(new Date(timestamp));
+    }
+
+    public static String getDateStringMediumCurrentDay() {
+        return getDateStringMedium(getCurrentTimestamp());
+    }
+
+    public static long getTimeFromDateStringMedium(String date) {
+        try {
+            return SDF_DATE_MEDIUM.parse(date).getTime();
+        } catch (ParseException e) {
+            return 0;
+        }
+    }
+
+    public static String getDateStringWithoutDay(Date date) {
+        return SDF_DATE_WITHOUT_DAY.format(date);
+    }
+
+    public static String getDateStringWithoutDay(long timestamp) {
+        return getDateStringWithoutDay(new Date(timestamp));
+    }
+
+    public static String getDateStringWithoutDayCurrentDay() {
+        return getDateStringWithoutDay(getCurrentTimestamp());
+    }
+
+    public static String getDateStringWithoutDay(int year, int month, int day) {
+        Calendar calendar = getCalendarOfTime(year, month, day);
+        return getDateStringWithoutDay(calendar.getTimeInMillis());
+    }
+
+    public static long getTimeFromDateStringWithoutDay(String date) {
+        try {
+            return SDF_DATE_WITHOUT_DAY.parse(date).getTime();
+        } catch (ParseException e) {
+            return 0;
+        }
+    }
 
     public static int getDiffDays(long timestamp1, long timestamp2) {
         long diffTime = timestamp1 - timestamp2;
@@ -15,11 +75,16 @@ public class MyDateTimeUtils {
         return (int) TimeUnit.DAYS.convert(diffTime, TimeUnit.MILLISECONDS);
     }
 
-    public static long getStartTimeOfDate(int year, int month, int date) {
+    public static Calendar getCalendarOfTime(int year, int month, int day) {
         Calendar calendar = getCurrentCalendar();
         calendar.set(Calendar.YEAR, year);
         calendar.set(Calendar.MONTH, month - 1);
-        calendar.set(Calendar.DATE, date);
+        calendar.set(Calendar.DATE, day);
+        return calendar;
+    }
+
+    public static long getStartTimeOfDate(int year, int month, int day) {
+        Calendar calendar = getCalendarOfTime(year, month, day);
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
