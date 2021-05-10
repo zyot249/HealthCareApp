@@ -45,7 +45,7 @@ public class DateReportFragment extends Fragment implements View.OnClickListener
 
     private TextView footStepsTxt;
     private TextView kcalTxt;
-    private TextView timeTxt;
+    private TextView distanceTxt;
     private TextView dateChosenTxt;
     private LineChart activityLineChart;
 
@@ -71,26 +71,32 @@ public class DateReportFragment extends Fragment implements View.OnClickListener
             long time = MyDateTimeUtils.getTimeFromDateStringMedium(s);
             Log.d(TAG, "Chosen Time: " + time);
             loadActivityData(time);
+            loadStepData(MyDateTimeUtils.getStartTimeOfDate(time));
         });
         mViewModel.getActivityData().observe(getViewLifecycleOwner(), data -> {
-            List<Entry> dataList = new ArrayList<>();
-            data.entrySet().stream()
-                    .sorted(Map.Entry.comparingByKey())
-                    .forEach(entry -> dataList.add(new Entry(entry.getKey(), entry.getValue())));
-            LineDataSet dataSet = new LineDataSet(dataList, "Activity");
-            dataSet.setLineWidth(1);
-            dataSet.setDrawFilled(true);
-            dataSet.setDrawValues(false);
-            dataSet.setMode(LineDataSet.Mode.STEPPED);
-            LineData lineData = new LineData(dataSet);
-            activityLineChart.setData(lineData);
+            if (data != null) {
+                List<Entry> dataList = new ArrayList<>();
+                data.entrySet().stream()
+                        .sorted(Map.Entry.comparingByKey())
+                        .forEach(entry -> dataList.add(new Entry(entry.getKey(), entry.getValue())));
+                LineDataSet dataSet = new LineDataSet(dataList, "Activity");
+                dataSet.setLineWidth(1);
+                dataSet.setDrawFilled(true);
+                dataSet.setDrawValues(false);
+                dataSet.setMode(LineDataSet.Mode.STEPPED);
+                LineData lineData = new LineData(dataSet);
+                activityLineChart.setData(lineData);
+            } else
+                activityLineChart.setData(null);
+
             activityLineChart.moveViewToX(activityLineChart.getXChartMax());
             activityLineChart.invalidate();
         });
         mViewModel.getSteps().observe(getViewLifecycleOwner(), s -> footStepsTxt.setText(s));
         mViewModel.getCalo().observe(getViewLifecycleOwner(), s -> kcalTxt.setText(s));
-        mViewModel.getTime().observe(getViewLifecycleOwner(), s -> timeTxt.setText(s));
+        mViewModel.getDistance().observe(getViewLifecycleOwner(), s -> distanceTxt.setText(s));
         loadActivityData(MyDateTimeUtils.getCurrentTimestamp());
+        loadStepData(MyDateTimeUtils.getStartTimeOfCurrentDate());
     }
 
     @Override
@@ -100,7 +106,7 @@ public class DateReportFragment extends Fragment implements View.OnClickListener
         dateChosenTxt = view.findViewById(R.id.date_chosen_txt);
         footStepsTxt = view.findViewById(R.id.foot_step_txt);
         kcalTxt = view.findViewById(R.id.calo_txt);
-        timeTxt = view.findViewById(R.id.time_txt);
+        distanceTxt = view.findViewById(R.id.distance_txt);
         activityLineChart = view.findViewById(R.id.date_line_chart);
 
         MaterialDatePicker.Builder<Long> dateBuilder = MaterialDatePicker.Builder.datePicker();
@@ -144,6 +150,7 @@ public class DateReportFragment extends Fragment implements View.OnClickListener
         activityLineChart.getAxisRight().setDrawGridLines(false);
         activityLineChart.enableScroll();
         activityLineChart.setScaleYEnabled(false);
+        activityLineChart.setNoDataText("No Data");
 
         activityLineChart.invalidate();
     }
@@ -161,7 +168,24 @@ public class DateReportFragment extends Fragment implements View.OnClickListener
                         userActivityData.put(timePointInDayOfState, activityEntity.getActivity());
                     }
                     mViewModel.setActivityData(userActivityData);
-                }, err -> Log.d(TAG, "error: " + err.getMessage()));
+                }, err -> Log.e(TAG, "error: " + err.getMessage()));
+    }
+
+    private void loadStepData(long startTimeOfDate) {
+        userActivityRepository.getUserStepDataInDay(startTimeOfDate)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(data -> {
+                    if (data != null) {
+                        mViewModel.setSteps(String.valueOf(data.getAmountOfSteps()));
+                        mViewModel.setDistance(String.format("%.2f", data.getDistance()));
+                        mViewModel.setCalo(String.format("%.2f", data.getTotalCaloriesBurned()));
+                    } else {
+                        mViewModel.setSteps("0");
+                        mViewModel.setDistance("0");
+                        mViewModel.setCalo("0");
+                    }
+                }, err -> Log.e(TAG, "error: " + err.getMessage()));
     }
 
     @Override

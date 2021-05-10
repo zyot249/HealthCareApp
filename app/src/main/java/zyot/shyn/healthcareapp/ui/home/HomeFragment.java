@@ -13,7 +13,6 @@ import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -35,13 +34,10 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
 
 import zyot.shyn.HumanActivity;
 import zyot.shyn.healthcareapp.R;
@@ -60,7 +56,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private TextView heightTxt;
     private TextView footStepsTxt;
     private TextView kcalTxt;
-    private TextView timeTxt;
+    private TextView distanceTxt;
     private TextView spo2Txt;
     private TextView heartRateTxt;
     private TextView curStateTxt;
@@ -89,7 +85,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         heightTxt = view.findViewById(R.id.height_txt);
         footStepsTxt = view.findViewById(R.id.foot_step_txt);
         kcalTxt = view.findViewById(R.id.calo_txt);
-        timeTxt = view.findViewById(R.id.time_txt);
+        distanceTxt = view.findViewById(R.id.distance_txt);
         spo2Txt = view.findViewById(R.id.spo2_txt);
         heartRateTxt = view.findViewById(R.id.heart_rate_txt);
         curStateTxt = view.findViewById(R.id.cur_state_txt);
@@ -100,7 +96,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         homeViewModel.getHeight().observe(getViewLifecycleOwner(), s -> heightTxt.setText(s));
         homeViewModel.getSteps().observe(getViewLifecycleOwner(), s -> footStepsTxt.setText(s));
         homeViewModel.getCalo().observe(getViewLifecycleOwner(), s -> kcalTxt.setText(s));
-        homeViewModel.getTime().observe(getViewLifecycleOwner(), s -> timeTxt.setText(s));
+        homeViewModel.getDistance().observe(getViewLifecycleOwner(), s -> distanceTxt.setText(s));
         homeViewModel.getSpo2().observe(getViewLifecycleOwner(), s -> spo2Txt.setText(s));
         homeViewModel.getHeartRate().observe(getViewLifecycleOwner(), s -> heartRateTxt.setText(s));
         homeViewModel.getCurState().observe(getViewLifecycleOwner(), s -> curStateTxt.setText(s));
@@ -191,6 +187,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         xAxis.setLabelCount(6, true);
         xAxis.setTextColor(Color.WHITE);
         xAxis.setSpaceMax(5);
+        xAxis.setGranularityEnabled(true);
+        xAxis.setGranularity(1);
         xAxis.setValueFormatter(new ValueFormatter() {
             private final SimpleDateFormat mFormat = new SimpleDateFormat("HH:mm:ss");
 
@@ -205,6 +203,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         YAxis yAxisLeft = activityLineChart.getAxisLeft();
         yAxisLeft.setAxisMinimum(0);
         yAxisLeft.setAxisMaximum(6);
+        yAxisLeft.setGranularity(1);
+        yAxisLeft.setGranularityEnabled(true);
         yAxisLeft.setTextColor(Color.WHITE);
         yAxisLeft.setValueFormatter(new ValueFormatter() {
             @Override
@@ -247,7 +247,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                     data = service.getData();
 
                     homeViewModel.setSteps(data.get("steps"));
-                    homeViewModel.setTime(data.get("duration"));
+                    homeViewModel.setDistance(data.get("distance"));
                     homeViewModel.setCalo(data.get("caloBurned"));
                     homeViewModel.setSpo2(data.get("relaxTime"));
                     homeViewModel.setHeartRate(data.get("activeTime"));

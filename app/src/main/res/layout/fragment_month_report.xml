@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.report.month.MonthReportFragment">
+
     <ScrollView
         android:id="@+id/date_report_scroll_view"
         android:layout_width="match_parent"
@@ -43,15 +44,104 @@
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/date_report_title" />
 
+            <LinearLayout
+                android:id="@+id/user_activity_info_layout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:baselineAligned="false"
+                android:orientation="horizontal"
+                android:weightSum="3"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/month_chosen_txt"
+                app:layout_constraintWidth_percent="0.9">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="100dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:text="Foot Steps"
+                        android:textSize="18dp" />
+
+                    <TextView
+                        android:id="@+id/footstep_txt"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:text="510"
+                        android:textSize="22dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="100dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:text="Calories"
+                        android:textSize="18dp" />
+
+                    <TextView
+                        android:id="@+id/calo_txt"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:text="510"
+                        android:textSize="22dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="100dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:text="Distance"
+                        android:textSize="18dp" />
+
+                    <TextView
+                        android:id="@+id/distance_txt"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:text="510"
+                        android:textSize="22dp" />
+
+                </LinearLayout>
+            </LinearLayout>
+
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/month_user_footsteps_info"
                 android:layout_width="0dp"
-                android:layout_height="250dp"
+                android:layout_height="450dp"
                 android:layout_marginTop="16dp"
                 app:cardElevation="10dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/month_chosen_txt"
+                app:layout_constraintTop_toBottomOf="@+id/user_activity_info_layout"
                 app:layout_constraintWidth_percent="0.9"
                 app:strokeColor="@color/cardview_dark_background"
                 app:strokeWidth="3dp">
@@ -63,7 +153,7 @@
                     android:padding="16dp">
 
                     <TextView
-                        android:id="@+id/date_footsteps_graph_title"
+                        android:id="@+id/month_footsteps_graph_title"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Your Footsteps"
@@ -74,14 +164,14 @@
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <com.github.mikephil.charting.charts.LineChart
-                        android:id="@+id/date_line_chart"
+                        android:id="@+id/month_footsteps_line_chart"
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_marginTop="8dp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintLeft_toLeftOf="parent"
                         app:layout_constraintRight_toRightOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/date_footsteps_graph_title"
+                        app:layout_constraintTop_toBottomOf="@+id/month_footsteps_graph_title"
                         app:layout_constraintVertical_bias="1.0" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>

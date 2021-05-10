@@ -124,4 +124,8 @@ public class MyDateTimeUtils {
         calendar.setTimeInMillis(timestamp);
         return calendar;
     }
+
+    public static int getDayOfMonth(long timestamp) {
+        return getCalendarOfTimestamp(timestamp).get(Calendar.DAY_OF_MONTH);
+    }
 }

@@ -39,6 +39,7 @@ import zyot.shyn.healthcareapp.R;
 import zyot.shyn.healthcareapp.activity.MainActivity;
 import zyot.shyn.healthcareapp.base.Constants;
 import zyot.shyn.healthcareapp.entity.UserActivityEntity;
+import zyot.shyn.healthcareapp.entity.UserStepEntity;
 import zyot.shyn.healthcareapp.model.AccelerationData;
 import zyot.shyn.healthcareapp.repository.UserActivityRepository;
 import zyot.shyn.healthcareapp.utils.MyDateTimeUtils;
@@ -89,9 +90,9 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
         super.onCreate();
         createNotificationChannel();
 
-        ax = ay = az = new ArrayList<>();
-        lx = ly = lz = new ArrayList<>();
-        gx = gy = gz = new ArrayList<>();
+        ax = new ArrayList<>(); ay = new ArrayList<>(); az = new ArrayList<>();
+        lx = new ArrayList<>(); ly = new ArrayList<>(); lz = new ArrayList<>();
+        gx = new ArrayList<>(); gy = new ArrayList<>(); gz = new ArrayList<>();
 
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -156,6 +157,7 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
     @Override
     public void onDestroy() {
         super.onDestroy();
+        saveLastDataBeforeReset();
     }
 
     @Override
@@ -222,6 +224,7 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
     }
 
     public void stopForegroundService(boolean persist) {
+        saveLastDataBeforeReset();
         unregisterSensors();
         handler.removeCallbacks(timerRunnable);
         isActive = false;
@@ -304,10 +307,7 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
         if (index != -1) {
             long now = MyDateTimeUtils.getCurrentTimestamp();
             if (MyDateTimeUtils.getDiffDays(now, lastTimeActPrediction) > 0) {
-                UserActivityEntity userActivityEntity = new UserActivityEntity(startTimeOfCurState, curState.getIndex(), prevActivityDuration);
-                userActivityRepository.saveUserActivity(userActivityEntity)
-                        .subscribeOn(Schedulers.io())
-                        .subscribe();
+                saveLastDataBeforeReset();
                 resetData();
             }
             HumanActivity state = HumanActivity.getHumanActivity(index);
@@ -316,7 +316,7 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
                 UserActivityEntity userActivityEntity = new UserActivityEntity(startTimeOfCurState, curState.getIndex(), prevActivityDuration);
                 userActivityRepository.saveUserActivity(userActivityEntity)
                         .subscribeOn(Schedulers.io())
-                        .subscribe();
+                        .subscribe(() -> {}, err -> Log.e(TAG, "Error: " + err.getMessage()));
 
                 startTimeOfCurState = lastTimeActPrediction;
                 curState = state;
@@ -365,6 +365,21 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
                         userActivityData.put(timePointInDayOfState, activityEntity.getActivity());
                     }
                 }, err -> Log.d(TAG, "error: " + err.getMessage()));
+    }
+
+    private void saveLastDataBeforeReset() {
+        UserActivityEntity userActivityEntity = new UserActivityEntity(startTimeOfCurState, curState.getIndex(), prevActivityDuration);
+        userActivityRepository.saveUserActivity(userActivityEntity)
+                .subscribeOn(Schedulers.io())
+                .subscribe(() -> {}, err -> Log.e(TAG, "Error: " + err.getMessage()));
+        UserStepEntity userStepEntity = new UserStepEntity(MyDateTimeUtils.getStartTimeOfDate(lastTimeActPrediction),
+                amountOfSteps,
+                walkingSteps, joggingSteps, downstairsSteps, upstairsSteps,
+                totalCaloriesBurned, totalDistance
+        );
+        userActivityRepository.saveUserStep(userStepEntity)
+                .subscribeOn(Schedulers.io())
+                .subscribe(() -> {}, err -> Log.e(TAG, "Error: " + err.getMessage()));
     }
 
     private void calculateResults() {

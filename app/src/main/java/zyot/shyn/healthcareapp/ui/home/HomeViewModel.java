@@ -12,7 +12,7 @@ public class HomeViewModel extends ViewModel {
 
     private MutableLiveData<String> steps;
     private MutableLiveData<String> calo;
-    private MutableLiveData<String> time;
+    private MutableLiveData<String> distance;
 
     private MutableLiveData<String> spo2;
     private MutableLiveData<String> heartRate;
@@ -29,8 +29,8 @@ public class HomeViewModel extends ViewModel {
         steps.setValue("0");
         calo = new MutableLiveData<>();
         calo.setValue("0");
-        time = new MutableLiveData<>();
-        time.setValue("0");
+        distance = new MutableLiveData<>();
+        distance.setValue("0");
         spo2 = new MutableLiveData<>();
         spo2.setValue("0");
         heartRate = new MutableLiveData<>();
@@ -57,8 +57,8 @@ public class HomeViewModel extends ViewModel {
         return calo;
     }
 
-    public LiveData<String> getTime() {
-        return time;
+    public LiveData<String> getDistance() {
+        return distance;
     }
 
     public LiveData<String> getSpo2() {
@@ -93,8 +93,8 @@ public class HomeViewModel extends ViewModel {
         this.calo.setValue(calo);
     }
 
-    public void setTime(String time) {
-        this.time.setValue(time);
+    public void setDistance(String distance) {
+        this.distance.setValue(distance);
     }
 
     public void setSpo2(String spo2) {

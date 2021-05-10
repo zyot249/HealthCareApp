@@ -38,11 +38,11 @@ public class ReportFragment extends Fragment {
             Fragment fragment;
             switch (item.getItemId()) {
                 case R.id.date_page:
-                    fragment = new DateReportFragment();
+                    fragment = DateReportFragment.newInstance();
                     loadFragment(fragment);
                     return true;
                 case R.id.month_page:
-                    fragment = new MonthReportFragment();
+                    fragment = MonthReportFragment.newInstance();
                     loadFragment(fragment);
                     return true;
             }

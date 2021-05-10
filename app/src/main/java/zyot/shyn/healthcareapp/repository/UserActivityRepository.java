@@ -7,8 +7,10 @@ import java.util.List;
 import io.reactivex.Completable;
 import io.reactivex.Maybe;
 import zyot.shyn.healthcareapp.dao.UserActivityDao;
+import zyot.shyn.healthcareapp.dao.UserStepDao;
 import zyot.shyn.healthcareapp.database.AppDatabase;
 import zyot.shyn.healthcareapp.entity.UserActivityEntity;
+import zyot.shyn.healthcareapp.entity.UserStepEntity;
 import zyot.shyn.healthcareapp.pojo.ActivityDurationPOJO;
 import zyot.shyn.healthcareapp.utils.MyDateTimeUtils;
 
@@ -18,10 +20,12 @@ public class UserActivityRepository {
     private static volatile UserActivityRepository instance;
 
     private final UserActivityDao userActivityDao;
+    private final UserStepDao userStepDao;
 
     private UserActivityRepository(Application application) {
         AppDatabase db = AppDatabase.getDatabase(application);
         userActivityDao = db.userActivityDao();
+        userStepDao = db.userStepDao();
     }
 
     public static UserActivityRepository getInstance(final Application application) {
@@ -55,4 +59,19 @@ public class UserActivityRepository {
         long endTime = MyDateTimeUtils.getStartTimeOfDate(year, month + 1, 1) - 1;
         return userActivityDao.queryTotalTimeOfEachActivityBetween(startTime, endTime);
     }
+
+    public Completable saveUserStep(UserStepEntity userStepEntity) {
+        return userStepDao.insert(userStepEntity);
+    }
+
+    public Maybe<UserStepEntity> getUserStepDataInDay(long startTimeOfDay) {
+        return userStepDao.getUserStepInfo(startTimeOfDay);
+    }
+
+    public Maybe<List<UserStepEntity>> getUserStepDataInMonth(int year, int month) {
+        long startTime = MyDateTimeUtils.getStartTimeOfDate(year, month, 1);
+        long endTime = MyDateTimeUtils.getStartTimeOfDate(year, month + 1, 1) - 1;
+        return userStepDao.getUserStepInfoBetween(startTime, endTime);
+    }
+
 }

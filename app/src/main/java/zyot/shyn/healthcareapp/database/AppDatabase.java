@@ -10,10 +10,12 @@ import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import zyot.shyn.healthcareapp.dao.UserActivityDao;
+import zyot.shyn.healthcareapp.dao.UserStepDao;
 import zyot.shyn.healthcareapp.entity.UserActivityEntity;
+import zyot.shyn.healthcareapp.entity.UserStepEntity;
 
-@Database(entities = {UserActivityEntity.class},
-        version = 1, exportSchema = false)
+@Database(entities = {UserActivityEntity.class, UserStepEntity.class},
+        version = 2, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
     private static volatile AppDatabase instance;
 
@@ -32,7 +34,7 @@ public abstract class AppDatabase extends RoomDatabase {
                             AppDatabase.class, "health_db")
                             .addCallback(sRoomDatabaseCallback)
                             .fallbackToDestructiveMigration()
-                            /*.addMigrations(MIGRATION_1_2)*/
+//                            .addMigrations(MIGRATION_1_2)
                             .build();
                 }
             }
@@ -50,4 +52,6 @@ public abstract class AppDatabase extends RoomDatabase {
             };
 
     public abstract UserActivityDao userActivityDao();
+
+    public abstract UserStepDao userStepDao();
 }

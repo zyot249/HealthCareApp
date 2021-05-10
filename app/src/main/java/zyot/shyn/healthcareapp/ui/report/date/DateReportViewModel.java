@@ -13,7 +13,7 @@ public class DateReportViewModel extends ViewModel {
 
     private MutableLiveData<String> steps;
     private MutableLiveData<String> calo;
-    private MutableLiveData<String> time;
+    private MutableLiveData<String> distance;
 
     private MutableLiveData<HashMap<Float, Integer>> activityData;
 
@@ -25,8 +25,8 @@ public class DateReportViewModel extends ViewModel {
         steps.setValue("0");
         calo = new MutableLiveData<>();
         calo.setValue("0");
-        time = new MutableLiveData<>();
-        time.setValue("0");
+        distance = new MutableLiveData<>();
+        distance.setValue("0");
         activityData = new MutableLiveData<>();
         activityData.setValue(new HashMap<>());
     }
@@ -43,8 +43,8 @@ public class DateReportViewModel extends ViewModel {
         return calo;
     }
 
-    public LiveData<String> getTime() {
-        return time;
+    public LiveData<String> getDistance() {
+        return distance;
     }
 
     public LiveData<HashMap<Float, Integer>> getActivityData() {
@@ -63,8 +63,8 @@ public class DateReportViewModel extends ViewModel {
         this.calo.setValue(calo);
     }
 
-    public void setTime(String time) {
-        this.time.setValue(time);
+    public void setDistance(String distance) {
+        this.distance.setValue(distance);
     }
 
     public void setActivityData(HashMap<Float, Integer> data) {
