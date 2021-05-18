@@ -255,7 +255,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                     homeViewModel.setActivityData(service.getUserActivityData());
                 }
             }
-            handler.postDelayed(this, 1000);
+            handler.postDelayed(this, 2000);
         }
     };
 }

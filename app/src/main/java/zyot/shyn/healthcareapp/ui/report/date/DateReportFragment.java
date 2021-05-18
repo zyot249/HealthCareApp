@@ -160,7 +160,7 @@ public class DateReportFragment extends Fragment implements View.OnClickListener
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(data -> {
-                    Log.d(TAG, "size " + data.size());
+                    Log.d(TAG, " activity size " + data.size());
                     long startTimeOfDate = MyDateTimeUtils.getStartTimeOfDate(timestamp);
                     HashMap<Float, Integer> userActivityData = new HashMap<>();
                     for (UserActivityEntity activityEntity : data) {
@@ -180,12 +180,12 @@ public class DateReportFragment extends Fragment implements View.OnClickListener
                         mViewModel.setSteps(String.valueOf(data.getAmountOfSteps()));
                         mViewModel.setDistance(String.format("%.2f", data.getDistance()));
                         mViewModel.setCalo(String.format("%.2f", data.getTotalCaloriesBurned()));
-                    } else {
-                        mViewModel.setSteps("0");
-                        mViewModel.setDistance("0");
-                        mViewModel.setCalo("0");
                     }
-                }, err -> Log.e(TAG, "error: " + err.getMessage()));
+                }, err -> Log.e(TAG, "loadStepData error: " + err.getMessage()), () -> {
+                        mViewModel.setSteps("0");
+                        mViewModel.setCalo("0");
+                        mViewModel.setDistance("0");
+                });
     }
 
     @Override

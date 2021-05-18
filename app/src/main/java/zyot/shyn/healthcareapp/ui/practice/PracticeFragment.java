@@ -1,6 +1,7 @@
 package zyot.shyn.healthcareapp.ui.practice;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +30,9 @@ public class PracticeFragment extends Fragment {
                 textView.setText(s);
             }
         });
+
+        Bundle bundle = getArguments();
+        Log.d("TAG", bundle.getString("key"));
         return root;
     }
 }

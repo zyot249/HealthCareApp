@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Sensor;
@@ -15,13 +16,17 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemClock;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.navigation.NavDeepLinkBuilder;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -70,14 +75,18 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
     private long lastTimeActPrediction = 0, startTimeOfCurState = 0;
     private long prevActivityDuration = 0;
     private HumanActivity curState = HumanActivity.UNKNOWN;
-    private long activeTime = 0, relaxTime = 0;
     private HashMap<Float, Integer> userActivityData;
+
+    private long activityDuration = 0;
+    private boolean isWarn = false;
 
     private boolean isActive = false;
 
+    private SharedPreferences sp;
     private Handler handler = new Handler();
     String CHANNEL_ID = "healthcareapp_supervisorservice";
     int notification_id = 1711101;
+    int warning_notify_id = 1711102;
 
     private IBinder mBinder = new MyBinder();
 
@@ -89,6 +98,8 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
         Log.d(TAG, "onCreate");
         super.onCreate();
         createNotificationChannel();
+
+        sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
         ax = new ArrayList<>(); ay = new ArrayList<>(); az = new ArrayList<>();
         lx = new ArrayList<>(); ly = new ArrayList<>(); lz = new ArrayList<>();
@@ -119,13 +130,6 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
             case Constants.START_FOREGROUND:
                 Log.d(TAG, "starting service");
                 break;
-
-            case Constants.RESET_COUNT:
-                resetData();
-                break;
-
-            case Constants.STOP_SAVE_COUNT:
-                stopForegroundService(true);
 
             case Constants.STOP_FOREGROUND:
                 Log.d(TAG, "stopping service");
@@ -158,6 +162,7 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
     public void onDestroy() {
         super.onDestroy();
         saveLastDataBeforeReset();
+        Log.d(TAG, "service destroy");
     }
 
     @Override
@@ -240,8 +245,6 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
         totalDistance = 0;
         totalDuration = 0;
 
-        activeTime = relaxTime = 0;
-
         userActivityData.clear();
 
         startTime = SystemClock.uptimeMillis();
@@ -249,24 +252,14 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
     }
 
     private Notification getNotification(String title, String body) {
-        Intent resetIntent = new Intent(this, SuperviseHumanActivityService.class);
-        resetIntent.setAction(Constants.RESET_COUNT);
-        PendingIntent resetPendingIntent = PendingIntent.getService(this, 0, resetIntent, 0);
-
-        Intent stopIntent = new Intent(this, SuperviseHumanActivityService.class);
-        resetIntent.setAction(Constants.STOP_SAVE_COUNT);
-        PendingIntent stopPendingIntent = PendingIntent.getService(this, 0, stopIntent, 0);
-
         Intent intent = new Intent(this, MainActivity.class);
         PendingIntent resultPendingIntent = PendingIntent.getActivity(this, 9, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.logo)
                 .setContentTitle(title)
                 .setContentText(body)
-                .setLargeIcon(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(this.getResources(), R.drawable.logo), 97, 128, false))
                 .setContentIntent(resultPendingIntent)
-                .addAction(R.drawable.reset, "reset", resetPendingIntent)
-                .addAction(R.drawable.stop, "Stop", stopPendingIntent)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setOngoing(true)
                 .build();
 
@@ -286,16 +279,31 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
     }
 
     private Notification updateNotification() {
-        String body = "";
-        String title = "Step Counter ";
-        HashMap<String, String> data = getData();
-
-        body += data.get("distance") + "                ";
-        body += data.get("duration");
-
-        Notification notification = getNotification("STEPS TAKEN :  " + data.get("steps"), body);
+        Notification notification = getNotification(curState.toString(), "");
 
         return notification;
+    }
+
+    private void showNoti(String textTitle, String textContent) {
+        Bundle bundle = new Bundle();
+        bundle.putString("key", "Hihihihihi");
+        PendingIntent resultPendingIntent = new NavDeepLinkBuilder(this)
+                .setComponentName(MainActivity.class)
+                .setGraph(R.navigation.mobile_navigation)
+                .setDestination(R.id.nav_practice)
+                .setArguments(bundle)
+                .createPendingIntent();
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.drawable.logo)
+                .setContentTitle(textTitle)
+                .setContentText(textContent)
+                .setContentIntent(resultPendingIntent)
+                .setOngoing(true)
+                .setAutoCancel(true)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        notificationManager.notify(warning_notify_id, builder.build());
     }
 
     public boolean isActive() {
@@ -324,7 +332,24 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
                 float timePointInDayOfState = (float) (startTimeOfCurState - startTimeOfDate) / 1000;
 
                 userActivityData.put(timePointInDayOfState, curState.getIndex());
+                isWarn = false;
             }
+
+            long startTimeNightSleep = MyDateTimeUtils.getDateFromTimeStringDefault(sp.getString("startTimeNightSleep", "00:00")).getTime();
+            long endTimeNightSleep = MyDateTimeUtils.getDateFromTimeStringDefault(sp.getString("endTimeNightSleep", "07:00")).getTime();
+            long startTimeNoonSleep = MyDateTimeUtils.getDateFromTimeStringDefault(sp.getString("startTimeNoonSleep", "11:30")).getTime();
+            long endTimeNoonSleep = MyDateTimeUtils.getDateFromTimeStringDefault(sp.getString("endTimeNoonSleep", "13:30")).getTime();
+            long maxTimeForSitOrStand = sp.getLong("maxTimeSitOrStand", 1000);
+
+            activityDuration = now - startTimeOfCurState;
+            if ((now < startTimeNightSleep || now > endTimeNightSleep) &&
+                    (now < startTimeNoonSleep || now > endTimeNoonSleep) &&
+                    (curState == HumanActivity.SITTING || curState == HumanActivity.STANDING) &&
+                    activityDuration > maxTimeForSitOrStand && !isWarn) {
+                showNoti("Warning", "You need to do exercise now!!!");
+                isWarn = true;
+            }
+
             lastTimeActPrediction = now;
         }
     }
@@ -342,8 +367,6 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
         data.put("steps", String.valueOf(amountOfSteps));
         data.put("distance", String.format(getString(R.string.distance), totalDistance));
         data.put("duration", duration);
-        data.put("relaxTime", String.valueOf(relaxTime));
-        data.put("activeTime", String.valueOf(activeTime));
         data.put("caloBurned", String.format(Locale.ENGLISH, "%.0f", totalCaloriesBurned));
         data.put("curState", curState.toString());
         return data;
@@ -426,7 +449,7 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
             startForeground(notification_id, notification);
             activityPrediction();
             calculateResults();
-            handler.postDelayed(this, 1000);
+            handler.postDelayed(this, 2000);
         }
     };
 }

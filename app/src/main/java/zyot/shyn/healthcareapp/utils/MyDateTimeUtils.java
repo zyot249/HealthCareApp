@@ -14,13 +14,41 @@ public class MyDateTimeUtils {
 
     public static final String DATE_PATTERN_MEDIUM = "MMM dd, yyyy";
     public static final String DATE_PATTERN_WITHOUT_DAY = "MMM, yyyy";
+    public static final String TIME_PATTERN_DEFAULT = "HH:mm";
 
     public static final SimpleDateFormat SDF_DATE_MEDIUM = new SimpleDateFormat(DATE_PATTERN_MEDIUM, Locale.getDefault());
     public static final SimpleDateFormat SDF_DATE_WITHOUT_DAY = new SimpleDateFormat(DATE_PATTERN_WITHOUT_DAY, Locale.getDefault());
+    public static final SimpleDateFormat SDF_TIME_DEFAULT = new SimpleDateFormat(TIME_PATTERN_DEFAULT, Locale.getDefault());
 
     static {
         SDF_DATE_MEDIUM.setTimeZone(TimeZone.getDefault());
         SDF_DATE_WITHOUT_DAY.setTimeZone(TimeZone.getDefault());
+        SDF_TIME_DEFAULT.setTimeZone(TimeZone.getDefault());
+    }
+
+    public static String getTimeStringDefault(Date date) {
+        return SDF_TIME_DEFAULT.format(date);
+    }
+
+    public static String getTimeStringDefault(int hour, int minute) {
+        Calendar calendar = getCalendarFromTime(hour, minute);
+        return getTimeStringDefault(new Date(calendar.getTimeInMillis()));
+    }
+
+    public static Calendar getCalendarFromTime(int hour, int minute) {
+        Calendar calendar = getCurrentCalendar();
+
+        calendar.set(Calendar.HOUR_OF_DAY, hour);
+        calendar.set(Calendar.MINUTE, minute);
+        return calendar;
+    }
+
+    public static Date getDateFromTimeStringDefault(String time) {
+        try {
+            return SDF_TIME_DEFAULT.parse(time);
+        } catch (ParseException e) {
+            return null;
+        }
     }
 
     public static String getDateStringMedium(Date date) {
@@ -127,5 +155,19 @@ public class MyDateTimeUtils {
 
     public static int getDayOfMonth(long timestamp) {
         return getCalendarOfTimestamp(timestamp).get(Calendar.DAY_OF_MONTH);
+    }
+
+    public static long getDuration(int hour, int minute) {
+        return (hour * 60 + minute) * 60 * 1000;
+    }
+
+    public static String getTimeStringDuration(long duration) {
+        int hour = (int) (duration / (60 * 60 * 1000));
+        int minute = (int) (duration / (60 * 1000) - hour * 60);
+        String timeString = "";
+        timeString += hour < 10 ? "0" + hour : "" + hour;
+        timeString += ":";
+        timeString += minute < 10 ? "0" + minute : "" + minute;
+        return timeString;
     }
 }
