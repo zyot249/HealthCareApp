@@ -107,7 +107,7 @@
             android:id="@+id/age_et"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Age"
+            android:hint="Birth Year"
             android:inputType="number"
             android:singleLine="true" />
     </com.google.android.material.textfield.TextInputLayout>

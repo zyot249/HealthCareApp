@@ -16,6 +16,7 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -76,10 +77,10 @@ public class MainActivity extends BaseActivity {
                 User user = dataSnapshot.getValue(User.class);
                 Log.d(TAG, user.getDisplayName());
                 displayNameTxt.setText(user.getDisplayName());
-//                if (user.getImageUrl().equals("default"))
-//                    userImage.setImageResource(R.mipmap.ic_launcher_round);
-//                else
-//                    Glide.with(getApplicationContext()).load(user.getImageUrl()).into(userImage);
+                if (user.getAvatar().equals("default"))
+                    avaImg.setImageResource(R.mipmap.ic_launcher_round);
+                else
+                    Glide.with(getApplicationContext()).load(user.getAvatar()).into(avaImg);
             }
 
             @Override
