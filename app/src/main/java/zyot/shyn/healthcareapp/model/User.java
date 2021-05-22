@@ -3,17 +3,19 @@ package zyot.shyn.healthcareapp.model;
 public class User {
     private String id;
     private String displayName;
-    private int age;
+    private int birthYear;
     private String gender;
+    private String avatar;
 
     public User() {
     }
 
-    public User(String id, String displayName, int age, String gender) {
+    public User(String id, String displayName, int birthYear, String gender, String avatar) {
         this.id = id;
         this.displayName = displayName;
-        this.age = age;
+        this.birthYear = birthYear;
         this.gender = gender;
+        this.avatar = avatar;
     }
 
     public String getId() {
@@ -32,12 +34,12 @@ public class User {
         this.displayName = displayName;
     }
 
-    public int getAge() {
-        return age;
+    public int getBirthYear() {
+        return birthYear;
     }
 
-    public void setAge(int age) {
-        this.age = age;
+    public void setBirthYear(int birthYear) {
+        this.birthYear = birthYear;
     }
 
     public String getGender() {
@@ -46,5 +48,13 @@ public class User {
 
     public void setGender(String gender) {
         this.gender = gender;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 }
