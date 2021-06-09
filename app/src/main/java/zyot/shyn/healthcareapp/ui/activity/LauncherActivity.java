@@ -1,4 +1,4 @@
-package zyot.shyn.healthcareapp.activity;
+package zyot.shyn.healthcareapp.ui.activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;

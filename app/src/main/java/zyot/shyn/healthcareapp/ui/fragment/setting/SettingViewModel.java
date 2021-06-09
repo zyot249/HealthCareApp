@@ -1,4 +1,4 @@
-package zyot.shyn.healthcareapp.ui.setting;
+package zyot.shyn.healthcareapp.ui.fragment.setting;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;

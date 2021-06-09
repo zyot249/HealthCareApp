@@ -1,4 +1,4 @@
-package zyot.shyn.healthcareapp.ui.home;
+package zyot.shyn.healthcareapp.ui.fragment.home;
 
 import android.app.Dialog;
 import android.content.ComponentName;

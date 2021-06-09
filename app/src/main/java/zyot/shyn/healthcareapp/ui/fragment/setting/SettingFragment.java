@@ -1,4 +1,4 @@
-package zyot.shyn.healthcareapp.ui.setting;
+package zyot.shyn.healthcareapp.ui.fragment.setting;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -47,7 +47,7 @@ import java.util.HashMap;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import zyot.shyn.healthcareapp.R;
-import zyot.shyn.healthcareapp.activity.SignInActivity;
+import zyot.shyn.healthcareapp.ui.activity.SignInActivity;
 import zyot.shyn.healthcareapp.model.User;
 import zyot.shyn.healthcareapp.utils.MyDateTimeUtils;
 

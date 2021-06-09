@@ -7,31 +7,31 @@
 
     <fragment
         android:id="@+id/nav_home"
-        android:name="zyot.shyn.healthcareapp.ui.home.HomeFragment"
+        android:name="zyot.shyn.healthcareapp.ui.fragment.home.HomeFragment"
         android:label="@string/menu_home"
         tools:layout="@layout/fragment_home" />
 
     <fragment
         android:id="@+id/nav_practice"
-        android:name="zyot.shyn.healthcareapp.ui.practice.PracticeFragment"
+        android:name="zyot.shyn.healthcareapp.ui.fragment.practice.PracticeFragment"
         android:label="@string/menu_practice"
         tools:layout="@layout/fragment_practice" />
 
     <fragment
         android:id="@+id/nav_report"
-        android:name="zyot.shyn.healthcareapp.ui.report.ReportFragment"
+        android:name="zyot.shyn.healthcareapp.ui.fragment.report.ReportFragment"
         android:label="@string/menu_report"
         tools:layout="@layout/fragment_report" />
 
     <fragment
         android:id="@+id/nav_family"
-        android:name="zyot.shyn.healthcareapp.ui.family.FamilyFragment"
+        android:name="zyot.shyn.healthcareapp.ui.fragment.family.FamilyFragment"
         android:label="@string/menu_family"
         tools:layout="@layout/fragment_family" />
 
     <fragment
         android:id="@+id/nav_setting"
-        android:name="zyot.shyn.healthcareapp.ui.setting.SettingFragment"
+        android:name="zyot.shyn.healthcareapp.ui.fragment.setting.SettingFragment"
         android:label="@string/menu_setting"
         tools:layout="@layout/fragment_setting" />
 </navigation>

@@ -1,4 +1,4 @@
-package zyot.shyn.healthcareapp.divider;
+package zyot.shyn.healthcareapp.ui.divider;
 
 import android.content.Context;
 import android.content.res.TypedArray;

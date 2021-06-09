@@ -1,7 +1,6 @@
-package zyot.shyn.healthcareapp.ui.practice;
+package zyot.shyn.healthcareapp.ui.fragment.practice;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,8 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import zyot.shyn.healthcareapp.R;
-import zyot.shyn.healthcareapp.adapter.ExerciseAdapter;
-import zyot.shyn.healthcareapp.divider.SampleDivider;
+import zyot.shyn.healthcareapp.ui.adapter.ExerciseAdapter;
+import zyot.shyn.healthcareapp.ui.divider.SampleDivider;
 import zyot.shyn.healthcareapp.model.Exercise;
 import zyot.shyn.healthcareapp.utils.MyNumberUtils;
 

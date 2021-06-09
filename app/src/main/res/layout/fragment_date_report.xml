@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.report.date.DateReportFragment">
+    tools:context=".ui.fragment.report.date.DateReportFragment">
 
     <ScrollView
         android:id="@+id/date_report_scroll_view"

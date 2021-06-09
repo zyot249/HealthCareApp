@@ -1,4 +1,4 @@
-package zyot.shyn.healthcareapp.ui.family;
+package zyot.shyn.healthcareapp.ui.fragment.family;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;

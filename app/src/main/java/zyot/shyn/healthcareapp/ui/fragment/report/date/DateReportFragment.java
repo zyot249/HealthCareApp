@@ -1,4 +1,4 @@
-package zyot.shyn.healthcareapp.ui.report.date;
+package zyot.shyn.healthcareapp.ui.fragment.report.date;
 
 import android.graphics.Color;
 import android.os.Bundle;

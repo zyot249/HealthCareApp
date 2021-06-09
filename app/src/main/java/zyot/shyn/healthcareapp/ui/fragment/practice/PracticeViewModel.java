@@ -1,4 +1,4 @@
-package zyot.shyn.healthcareapp.ui.practice;
+package zyot.shyn.healthcareapp.ui.fragment.practice;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;

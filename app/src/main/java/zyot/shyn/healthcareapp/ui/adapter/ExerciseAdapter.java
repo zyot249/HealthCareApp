@@ -1,4 +1,4 @@
-package zyot.shyn.healthcareapp.adapter;
+package zyot.shyn.healthcareapp.ui.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;

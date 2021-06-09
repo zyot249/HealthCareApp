@@ -1,4 +1,4 @@
-package zyot.shyn.healthcareapp.ui.report;
+package zyot.shyn.healthcareapp.ui.fragment.report;
 
 import androidx.lifecycle.ViewModel;
 

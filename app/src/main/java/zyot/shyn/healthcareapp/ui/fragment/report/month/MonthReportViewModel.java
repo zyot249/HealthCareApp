@@ -1,4 +1,4 @@
-package zyot.shyn.healthcareapp.ui.report.month;
+package zyot.shyn.healthcareapp.ui.fragment.report.month;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;

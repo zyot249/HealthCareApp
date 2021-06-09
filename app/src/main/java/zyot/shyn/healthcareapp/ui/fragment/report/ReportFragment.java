@@ -1,4 +1,4 @@
-package zyot.shyn.healthcareapp.ui.report;
+package zyot.shyn.healthcareapp.ui.fragment.report;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -14,8 +14,8 @@ import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import zyot.shyn.healthcareapp.R;
-import zyot.shyn.healthcareapp.ui.report.date.DateReportFragment;
-import zyot.shyn.healthcareapp.ui.report.month.MonthReportFragment;
+import zyot.shyn.healthcareapp.ui.fragment.report.date.DateReportFragment;
+import zyot.shyn.healthcareapp.ui.fragment.report.month.MonthReportFragment;
 
 public class ReportFragment extends Fragment {
 

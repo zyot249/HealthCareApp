@@ -37,7 +37,6 @@ public class StepDetector {
     }
 
     private void handleAccelerationData() {
-
         for (int i = 0; i < newAccelerationDataList.size(); i++) {
             AccelerationData accelerationData = newAccelerationDataList.get(i);
             accelerationData = calculateValueAndTime(accelerationData);

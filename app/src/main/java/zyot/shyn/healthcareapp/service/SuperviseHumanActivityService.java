@@ -8,8 +8,6 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -29,19 +27,15 @@ import androidx.core.app.NotificationManagerCompat;
 import androidx.navigation.NavDeepLinkBuilder;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.TimeZone;
 
-import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 import zyot.shyn.HARClassifier;
 import zyot.shyn.HumanActivity;
 import zyot.shyn.healthcareapp.R;
-import zyot.shyn.healthcareapp.activity.MainActivity;
+import zyot.shyn.healthcareapp.ui.activity.MainActivity;
 import zyot.shyn.healthcareapp.base.Constants;
 import zyot.shyn.healthcareapp.entity.UserActivityEntity;
 import zyot.shyn.healthcareapp.entity.UserStepEntity;
@@ -200,13 +194,13 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
 
     private void registerSensors() {
         if (mLinearAcceleration != null)
-            mSensorManager.registerListener(SuperviseHumanActivityService.this, mLinearAcceleration, SensorManager.SENSOR_DELAY_FASTEST);
+            mSensorManager.registerListener(SuperviseHumanActivityService.this, mLinearAcceleration, 20000);
 
         if (mAccelerometer != null)
-            mSensorManager.registerListener(SuperviseHumanActivityService.this, mAccelerometer, SensorManager.SENSOR_DELAY_FASTEST);
+            mSensorManager.registerListener(SuperviseHumanActivityService.this, mAccelerometer, 20000);
 
         if (mGyroscope != null)
-            mSensorManager.registerListener(SuperviseHumanActivityService.this, mGyroscope, SensorManager.SENSOR_DELAY_FASTEST);
+            mSensorManager.registerListener(SuperviseHumanActivityService.this, mGyroscope, 20000);
     }
 
     private void unregisterSensors() {
@@ -311,6 +305,7 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
     }
 
     private void activityPrediction() {
+        Log.d(TAG, "size: " + ax.size() + " " + ay.size() + " " + az.size() + " " + lx.size() + " " + ly.size() + " " + lz.size() + " " + gx.size() + " " + gy.size() + " " + gz.size());
         int index = classifier.predictHumanActivity(ax, ay, az, lx, ly, lz, gx, gy, gz);
         if (index != -1) {
             long now = MyDateTimeUtils.getCurrentTimestamp();
