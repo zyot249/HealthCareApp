@@ -4,57 +4,128 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/purple_500"
     tools:context=".ui.fragment.setting.SettingFragment">
 
-    <ScrollView
-        android:layout_width="match_parent"
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/user_image"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="16dp"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:src="@mipmap/ic_launcher_round"
+        app:civ_border_color="@color/color2"
+        app:civ_border_overlay="true"
+        app:civ_border_width="3dp"
+        app:layout_constraintHeight_percent="0.45"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_percent="0.5" />
+
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@+id/logout_btn"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/user_image">
+        <LinearLayout
+            android:paddingVertical="16dp"
+            android:id="@+id/night_sleep_time_layout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/user_image"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_centerHorizontal="true"
-                android:layout_centerVertical="true"
-                android:src="@mipmap/ic_launcher_round"
-                app:civ_border_color="@color/color2"
-                app:civ_border_overlay="true"
-                app:civ_border_width="3dp"
-                app:layout_constraintHeight_percent="0.45"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintWidth_percent="0.5" />
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
             <LinearLayout
-                android:id="@+id/night_sleep_time_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="36dp"
-                android:orientation="vertical"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/user_image">
+                android:layout_marginHorizontal="36dp"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:src="@drawable/ic_baseline_account_circle_24" />
 
                 <TextView
+                    android:id="@+id/change_profile_txt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Night sleep" />
+                    android:layout_marginLeft="26dp"
+                    android:text="Profile"
+                    android:textColor="@color/color1"
+                    android:textSize="24dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="36dp"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:src="@drawable/ic_baseline_security_24" />
+
+                <TextView
+                    android:id="@+id/change_pass_txt"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="26dp"
+                    android:text="Change password"
+                    android:textColor="@color/color1"
+                    android:textSize="24dp" />
+            </LinearLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="36dp"
+                android:layout_marginTop="16dp">
+
+                <ImageView
+                    android:id="@+id/sleep_img"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:src="@drawable/ic_baseline_airline_seat_individual_suite_24"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/sleep_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="26dp"
+                    android:text="Sleeping time"
+                    android:textColor="@color/color1"
+                    android:textSize="24dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/sleep_img"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/night_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="Night:"
+                    android:textColor="@color/color1"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/sleep_title"
+                    app:layout_constraintTop_toBottomOf="@+id/sleep_title" />
 
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:id="@+id/night_time_layout"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:weightSum="2">
+                    android:weightSum="2"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/sleep_title"
+                    app:layout_constraintTop_toBottomOf="@+id/night_title">
 
                     <TextView
                         android:id="@+id/start_time_night_sleep"
@@ -63,6 +134,7 @@
                         android:layout_weight="1"
                         android:gravity="center"
                         android:text="00:00"
+                        android:textColor="@color/color1"
                         android:textSize="22dp" />
 
                     <TextView
@@ -72,29 +144,29 @@
                         android:layout_weight="1"
                         android:gravity="center"
                         android:text="07:00"
+                        android:textColor="@color/color1"
                         android:textSize="22dp" />
                 </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/noon_sleep_time_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/night_sleep_time_layout">
 
                 <TextView
-                    android:layout_width="match_parent"
+                    android:id="@+id/noon_title"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Noon sleep" />
+                    android:layout_marginTop="6dp"
+                    android:text="Noon:"
+                    android:textColor="@color/color1"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/sleep_title"
+                    app:layout_constraintTop_toBottomOf="@+id/night_time_layout" />
 
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:weightSum="2">
+                    android:weightSum="2"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/sleep_title"
+                    app:layout_constraintTop_toBottomOf="@+id/noon_title">
 
                     <TextView
                         android:id="@+id/start_time_noon_sleep"
@@ -103,6 +175,7 @@
                         android:layout_weight="1"
                         android:gravity="center"
                         android:text="11:30"
+                        android:textColor="@color/color1"
                         android:textSize="22dp" />
 
                     <TextView
@@ -112,35 +185,44 @@
                         android:layout_weight="1"
                         android:gravity="center"
                         android:text="13:30"
+                        android:textColor="@color/color1"
                         android:textSize="22dp" />
                 </LinearLayout>
-            </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <LinearLayout
-                android:id="@+id/time_sit_or_stand_layout"
+                android:id="@+id/time_concentrate_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/noon_sleep_time_layout">
+                android:layout_marginHorizontal="36dp"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:src="@drawable/ic_baseline_alarm_24" />
 
                 <TextView
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Time for sitting or standing" />
+                    android:layout_marginLeft="26dp"
+                    android:text="Concentrate time:"
+                    android:textColor="@color/color1"
+                    android:textSize="22dp" />
 
 
                 <TextView
                     android:id="@+id/max_time_sitting"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center"
                     android:text="11:30"
+                    android:textColor="@color/color1"
                     android:textSize="22dp" />
             </LinearLayout>
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
     </ScrollView>
 
     <androidx.appcompat.widget.AppCompatButton

@@ -23,6 +23,8 @@ import zyot.shyn.healthcareapp.base.BaseActivity;
 import zyot.shyn.healthcareapp.model.User;
 import zyot.shyn.healthcareapp.utils.MyStringUtils;
 
+import static zyot.shyn.healthcareapp.base.Constants.GENDER_OPTIONS;
+
 public class SignUpActivity extends BaseActivity {
     private static final String TAG = SignUpActivity.class.getSimpleName();
 
@@ -36,8 +38,6 @@ public class SignUpActivity extends BaseActivity {
 
     private FirebaseAuth mAuth;
     private DatabaseReference dbReference;
-
-    private static final String[] GENDER_OPTIONS = new String[]{"Male", "Female", "Other"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,7 +114,7 @@ public class SignUpActivity extends BaseActivity {
             return false;
         }
         if (!cfPass.equals(pass)) {
-            Snackbar.make(submitBtn, "Confirm password is not wrong!", Snackbar.LENGTH_SHORT).show();
+            Snackbar.make(submitBtn, "Confirm password is not correct!", Snackbar.LENGTH_SHORT).show();
             return false;
         }
         return true;

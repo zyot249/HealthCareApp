@@ -5,4 +5,6 @@ public class Constants {
     public static final String STOP_FOREGROUND = "stop_foreground";
     public static final String RESET_COUNT = "reset_count";
     public static final String STOP_SAVE_COUNT = "stop_save_count";
+
+    public static final String[] GENDER_OPTIONS = new String[]{"Male", "Female", "Other"};
 }

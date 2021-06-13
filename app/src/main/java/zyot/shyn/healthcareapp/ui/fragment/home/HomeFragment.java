@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
 import android.text.InputType;
 import android.view.LayoutInflater;
@@ -32,6 +31,9 @@ import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -41,6 +43,7 @@ import java.util.Map;
 
 import zyot.shyn.HumanActivity;
 import zyot.shyn.healthcareapp.R;
+import zyot.shyn.healthcareapp.event.UpdateUIEvent;
 import zyot.shyn.healthcareapp.service.SuperviseHumanActivityService;
 import zyot.shyn.healthcareapp.utils.MyDateTimeUtils;
 import zyot.shyn.healthcareapp.utils.MyStringUtils;
@@ -63,7 +66,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
     private LineChart activityLineChart;
 
-    private Handler handler = new Handler();
     private SuperviseHumanActivityService service = null;
     private boolean isBound;
 
@@ -125,14 +127,14 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         super.onResume();
         Intent intent = new Intent(getActivity(), SuperviseHumanActivityService.class);
         getActivity().bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
-        handler.postDelayed(timerRunnable, 0);
+        EventBus.getDefault().register(this);
     }
 
     @Override
     public void onPause() {
         super.onPause();
         getActivity().unbindService(mServiceConnection);
-        handler.removeCallbacks(timerRunnable);
+        EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -237,25 +239,21 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         }
     };
 
-    //Runnable that calculates the elapsed time since the user presses the "start" button
-    private Runnable timerRunnable = new Runnable() {
-        @Override
-        public void run() {
-            HashMap<String, String> data;
-            if (isBound) {
-                if (isAdded()) {
-                    data = service.getData();
+    @Subscribe
+    public void onUpdateUIEvent(UpdateUIEvent event) {
+        HashMap<String, String> data;
+        if (isBound) {
+            if (isAdded()) {
+                data = event.getData();
 
-                    homeViewModel.setSteps(data.get("steps"));
-                    homeViewModel.setDistance(data.get("distance"));
-                    homeViewModel.setCalo(data.get("caloBurned"));
-                    homeViewModel.setSpo2(data.get("relaxTime"));
-                    homeViewModel.setHeartRate(data.get("activeTime"));
-                    homeViewModel.setCurState(data.get("curState"));
-                    homeViewModel.setActivityData(service.getUserActivityData());
-                }
+                homeViewModel.setSteps(data.get("steps"));
+                homeViewModel.setDistance(data.get("distance"));
+                homeViewModel.setCalo(data.get("caloBurned"));
+                homeViewModel.setSpo2(data.get("relaxTime"));
+                homeViewModel.setHeartRate(data.get("activeTime"));
+                homeViewModel.setCurState(data.get("curState"));
+                homeViewModel.setActivityData(service.getUserActivityData());
             }
-            handler.postDelayed(this, 2000);
         }
-    };
+    }
 }

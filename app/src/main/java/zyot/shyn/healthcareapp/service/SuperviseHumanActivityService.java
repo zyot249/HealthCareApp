@@ -27,6 +27,8 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.navigation.NavDeepLinkBuilder;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +40,7 @@ import zyot.shyn.ActivityPrediction;
 import zyot.shyn.HARClassifier;
 import zyot.shyn.HumanActivity;
 import zyot.shyn.healthcareapp.R;
+import zyot.shyn.healthcareapp.event.UpdateUIEvent;
 import zyot.shyn.healthcareapp.ui.activity.MainActivity;
 import zyot.shyn.healthcareapp.base.Constants;
 import zyot.shyn.healthcareapp.entity.UserActivityEntity;
@@ -46,7 +49,7 @@ import zyot.shyn.healthcareapp.model.AccelerationData;
 import zyot.shyn.healthcareapp.repository.UserActivityRepository;
 import zyot.shyn.healthcareapp.utils.MyDateTimeUtils;
 
-public class SuperviseHumanActivityService extends Service implements SensorEventListener, StepListener, TextToSpeech.OnInitListener {
+public class SuperviseHumanActivityService extends Service implements SensorEventListener, StepListener {
     private static final String TAG = SuperviseHumanActivityService.class.getSimpleName();
     //Sensors
     private SensorManager mSensorManager;
@@ -381,14 +384,27 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
 
     public void loadDataToday() {
         final long now = MyDateTimeUtils.getCurrentTimestamp();
+        long startTimeOfDate = MyDateTimeUtils.getStartTimeOfDate(now);
         userActivityRepository.getUserActivityDataInDay(now)
                 .subscribeOn(Schedulers.io())
                 .subscribe(data -> {
                     Log.d(TAG, "size " + data.size());
-                    long startTimeOfDate = MyDateTimeUtils.getStartTimeOfDate(now);
                     for (UserActivityEntity activityEntity : data) {
                         float timePointInDayOfState = (float) (activityEntity.getTimestamp() - startTimeOfDate) / 1000;
                         userActivityData.put(timePointInDayOfState, activityEntity.getActivity());
+                    }
+                }, err -> Log.d(TAG, "error: " + err.getMessage()));
+        userActivityRepository.getUserStepDataInDay(startTimeOfDate)
+                .subscribeOn(Schedulers.io())
+                .subscribe(data -> {
+                    if (data != null) {
+                        amountOfSteps = data.getAmountOfSteps();
+                        walkingSteps = data.getWalkingSteps();
+                        joggingSteps = data.getJoggingSteps();
+                        downstairsSteps = data.getDownstairsSteps();
+                        upstairsSteps = data.getUpstairsSteps();
+                        totalCaloriesBurned = data.getTotalCaloriesBurned();
+                        totalDistance = data.getDistance();
                     }
                 }, err -> Log.d(TAG, "error: " + err.getMessage()));
     }
@@ -431,11 +447,6 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
         }
     }
 
-    @Override
-    public void onInit(int status) {
-
-    }
-
     public class MyBinder extends Binder {
         private SuperviseHumanActivityService service;
 
@@ -457,6 +468,7 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
             startForeground(notification_id, notification);
             activityPrediction();
             calculateResults();
+            EventBus.getDefault().post(new UpdateUIEvent(getData()));
             handler.postDelayed(this, 2000);
         }
     };

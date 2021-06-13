@@ -4,9 +4,11 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -88,7 +90,12 @@ public class PracticeFragment extends Fragment {
             if (key != null && !key.equals("")) {
                 int randomExercise = MyNumberUtils.randomIntegerBetween(1, exercises.size());
                 Exercise exercise = exercises.get(randomExercise - 1);
-                exerciseAdapter.getTutorialDialog(exercise.getName(), exercise.getDescription(), exercise.getDemoImg()).show();
+                AlertDialog alertDialog = exerciseAdapter.getTutorialDialog(exercise.getName(), exercise.getDescription(), exercise.getDemoImg()).show();
+                WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
+                layoutParams.copyFrom(alertDialog.getWindow().getAttributes());
+                layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
+                layoutParams.height = WindowManager.LayoutParams.MATCH_PARENT;
+                alertDialog.getWindow().setAttributes(layoutParams);
             }
         }
     }

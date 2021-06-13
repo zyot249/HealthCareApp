@@ -75,7 +75,6 @@ public class MainActivity extends BaseActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 User user = dataSnapshot.getValue(User.class);
-                Log.d(TAG, user.getDisplayName());
                 displayNameTxt.setText(user.getDisplayName());
                 if (user.getAvatar().equals("default"))
                     avaImg.setImageResource(R.mipmap.ic_launcher_round);

@@ -1,6 +1,7 @@
 package zyot.shyn.healthcareapp.ui.fragment.setting;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
 import android.content.ContentResolver;
@@ -9,11 +10,15 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,8 +32,12 @@ import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -50,8 +59,13 @@ import zyot.shyn.healthcareapp.R;
 import zyot.shyn.healthcareapp.ui.activity.SignInActivity;
 import zyot.shyn.healthcareapp.model.User;
 import zyot.shyn.healthcareapp.utils.MyDateTimeUtils;
+import zyot.shyn.healthcareapp.utils.MyNumberUtils;
+import zyot.shyn.healthcareapp.utils.MyStringUtils;
+
+import static zyot.shyn.healthcareapp.base.Constants.GENDER_OPTIONS;
 
 public class SettingFragment extends Fragment implements View.OnClickListener {
+    private static final String TAG = SettingFragment.class.getSimpleName();
 
     private static final int REQUEST_CODE_OPEN_IMAGE = 1001;
 
@@ -62,6 +76,9 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
     private TextView startTimeNoonSleepTxt;
     private TextView endTimeNoonSleepTxt;
     private TextView maxTimeSittingTxt;
+    private TextView changeProfileTxt;
+    private TextView changePassTxt;
+
 
     private CircleImageView userAvatar;
 
@@ -94,6 +111,8 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
         startTimeNoonSleepTxt = view.findViewById(R.id.start_time_noon_sleep);
         endTimeNoonSleepTxt = view.findViewById(R.id.end_time_noon_sleep);
         maxTimeSittingTxt = view.findViewById(R.id.max_time_sitting);
+        changeProfileTxt = view.findViewById(R.id.change_profile_txt);
+        changePassTxt = view.findViewById(R.id.change_pass_txt);
         userAvatar = view.findViewById(R.id.user_image);
         logoutBtn = view.findViewById(R.id.logout_btn);
 
@@ -102,6 +121,8 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
         startTimeNoonSleepTxt.setOnClickListener(this);
         endTimeNoonSleepTxt.setOnClickListener(this);
         maxTimeSittingTxt.setOnClickListener(this);
+        changeProfileTxt.setOnClickListener(this);
+        changePassTxt.setOnClickListener(this);
         userAvatar.setOnClickListener(this);
         logoutBtn.setOnClickListener(this);
     }
@@ -347,6 +368,74 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
                 openImageFolder();
                 break;
             }
+            case R.id.change_profile_txt: {
+                MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(getContext());
+                LayoutInflater li = LayoutInflater.from(getContext());
+                View dialogLayout = li.inflate(R.layout.dialog_change_profile, null);
+                AutoCompleteTextView autoCompleteTextView = dialogLayout.findViewById(R.id.auto_gender_opt);
+                EditText disNameEt = dialogLayout.findViewById(R.id.display_name_et);
+                EditText birthEt = dialogLayout.findViewById(R.id.birth_year_et);
+                ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this.getActivity(), R.layout.list_item_gender_dropdown, R.id.gender_opt_text, GENDER_OPTIONS);
+                autoCompleteTextView.setAdapter(arrayAdapter);
+                autoCompleteTextView.setThreshold(1);
+                dialogBuilder.setView(dialogLayout);
+                dbReference = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid());
+
+                dbReference.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        User user = dataSnapshot.getValue(User.class);
+                        disNameEt.setText(user.getDisplayName());
+                        autoCompleteTextView.setText(user.getGender());
+                        birthEt.setText(user.getBirthYear() + "");
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+                dialogBuilder
+                        .setTitle("Update profile")
+                        .setPositiveButton("Submit", (dialog, which) -> {
+                            Dialog dialogObj = (Dialog) dialog;
+                            EditText displayNameEt = dialogObj.findViewById(R.id.display_name_et);
+                            EditText birthYearEt = dialogObj.findViewById(R.id.birth_year_et);
+                            AutoCompleteTextView genderEt = dialogObj.findViewById(R.id.auto_gender_opt);
+                            String displayName = displayNameEt.getText().toString();
+                            int birthYear = Integer.parseInt(birthYearEt.getText().toString());
+                            String gender = genderEt.getText().toString();
+                            if (validateUpdateProfileInput(displayName, birthYear, gender))
+                                processUpdateProfile(displayName, birthYear, gender);
+                        })
+                        .setNegativeButton("Cancel", (dialog, which) -> {
+
+                        }).show();
+                break;
+            }
+            case R.id.change_pass_txt: {
+                MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(getContext());
+                LayoutInflater li = LayoutInflater.from(getContext());
+                View dialogLayout = li.inflate(R.layout.dialog_change_password, null);
+                dialogBuilder.setView(dialogLayout);
+                dialogBuilder
+                        .setTitle("Change password")
+                        .setPositiveButton("Submit", (dialog, which) -> {
+                            Dialog dialogObj = (Dialog) dialog;
+                            EditText curPassEt = dialogObj.findViewById(R.id.cur_pass_et);
+                            EditText newPassEt = dialogObj.findViewById(R.id.new_pass_et);
+                            EditText confPassEt = dialogObj.findViewById(R.id.confirm_pass_et);
+                            String curPass = curPassEt.getText().toString();
+                            String newPass = newPassEt.getText().toString();
+                            String confPass = confPassEt.getText().toString();
+                            if (validateChangePasswordInput(curPass, newPass, confPass))
+                                processUpdatePassword(curPass, newPass);
+                        })
+                        .setNegativeButton("Cancel", (dialog, which) -> {
+
+                        }).show();
+                break;
+            }
             case R.id.logout_btn: {
                 mAuth.signOut();
                 Intent intent = new Intent(getContext(), SignInActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -355,5 +444,98 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
                 break;
             }
         }
+    }
+
+    private boolean validateUpdateProfileInput(String displayName, int birthYear, String gender) {
+        if (MyStringUtils.isEmpty(displayName)) {
+            Snackbar.make(this.logoutBtn, "Display name is empty!", Snackbar.LENGTH_SHORT).show();
+            return false;
+        }
+        if (!MyNumberUtils.isValidBirthYear(birthYear)) {
+            Snackbar.make(this.logoutBtn, "Birth year is not correct!", Snackbar.LENGTH_SHORT).show();
+            return false;
+        }
+        if (MyStringUtils.isEmpty(gender)) {
+            Snackbar.make(this.logoutBtn, "Gender is empty!", Snackbar.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+    }
+
+    private boolean validateChangePasswordInput(String curPass, String newPass, String confPass) {
+        if (MyStringUtils.isEmpty(curPass)) {
+            Snackbar.make(this.logoutBtn, "Current password is empty!", Snackbar.LENGTH_SHORT).show();
+            return false;
+        }
+        if (MyStringUtils.isEmpty(newPass)) {
+            Snackbar.make(this.logoutBtn, "Password is empty!", Snackbar.LENGTH_SHORT).show();
+            return false;
+        }
+        if (MyStringUtils.isEmpty(confPass)) {
+            Snackbar.make(this.logoutBtn, "Confirm password is empty!", Snackbar.LENGTH_SHORT).show();
+            return false;
+        }
+        if (!MyStringUtils.isValidPassword(newPass)) {
+            Snackbar.make(this.logoutBtn, "Password is not valid!", Snackbar.LENGTH_SHORT).show();
+            return false;
+        }
+        if (!confPass.equals(newPass)) {
+            Snackbar.make(this.logoutBtn, "Confirm password is not correct!", Snackbar.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+    }
+
+    private void processUpdateProfile(String displayName, int birthYear, String gender) {
+        if (firebaseUser == null) {
+            return;
+        }
+        Button button = this.logoutBtn;
+        dbReference = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid());
+        HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put("displayName", displayName);
+        hashMap.put("birthYear", birthYear);
+        hashMap.put("gender", gender);
+        dbReference.updateChildren(hashMap).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful())
+                    Snackbar.make(button, "You've updated profile successfully!", Snackbar.LENGTH_SHORT).show();
+                else
+                    Snackbar.make(button, "Failed Action", Snackbar.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void processUpdatePassword(String curPass, String newPass) {
+        if (firebaseUser == null || firebaseUser.getEmail() == null) {
+            return;
+        }
+        Button button = this.logoutBtn;
+        AuthCredential credential = EmailAuthProvider
+                .getCredential(firebaseUser.getEmail(), curPass);
+        firebaseUser.reauthenticate(credential)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            firebaseUser.updatePassword(newPass).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        Log.d(TAG, "Password updated");
+                                        Snackbar.make(button, "Change password successfully!", Snackbar.LENGTH_SHORT).show();
+                                    } else {
+                                        Log.d(TAG, "Error password not updated");
+                                        Snackbar.make(button, "Some errors happened. Please try again!", Snackbar.LENGTH_SHORT).show();
+                                    }
+                                }
+                            });
+                        } else {
+                            Log.d(TAG, "Error auth failed");
+                            Snackbar.make(button, "Current password is not correct!", Snackbar.LENGTH_SHORT).show();
+                        }
+                    }
+                });
     }
 }
