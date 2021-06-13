@@ -19,6 +19,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -30,8 +31,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 
 import io.reactivex.schedulers.Schedulers;
+import zyot.shyn.ActivityPrediction;
 import zyot.shyn.HARClassifier;
 import zyot.shyn.HumanActivity;
 import zyot.shyn.healthcareapp.R;
@@ -43,7 +46,7 @@ import zyot.shyn.healthcareapp.model.AccelerationData;
 import zyot.shyn.healthcareapp.repository.UserActivityRepository;
 import zyot.shyn.healthcareapp.utils.MyDateTimeUtils;
 
-public class SuperviseHumanActivityService extends Service implements SensorEventListener, StepListener {
+public class SuperviseHumanActivityService extends Service implements SensorEventListener, StepListener, TextToSpeech.OnInitListener {
     private static final String TAG = SuperviseHumanActivityService.class.getSimpleName();
     //Sensors
     private SensorManager mSensorManager;
@@ -273,8 +276,13 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
     }
 
     private Notification updateNotification() {
-        Notification notification = getNotification(curState.toString(), "");
-
+        Notification notification =  new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.drawable.logo)
+                .setContentTitle(curState.toString())
+                .setPriority(NotificationCompat.PRIORITY_MIN)
+                .setNotificationSilent()
+                .setOngoing(true)
+                .build();
         return notification;
     }
 
@@ -305,8 +313,8 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
     }
 
     private void activityPrediction() {
-        Log.d(TAG, "size: " + ax.size() + " " + ay.size() + " " + az.size() + " " + lx.size() + " " + ly.size() + " " + lz.size() + " " + gx.size() + " " + gy.size() + " " + gz.size());
-        int index = classifier.predictHumanActivity(ax, ay, az, lx, ly, lz, gx, gy, gz);
+        ActivityPrediction activity = classifier.predictHumanActivity(ax, ay, az, lx, ly, lz, gx, gy, gz);
+        int index = activity.getActivityIdx();
         if (index != -1) {
             long now = MyDateTimeUtils.getCurrentTimestamp();
             if (MyDateTimeUtils.getDiffDays(now, lastTimeActPrediction) > 0) {
@@ -421,6 +429,11 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
             downstairsSteps++;
             amountOfSteps++;
         }
+    }
+
+    @Override
+    public void onInit(int status) {
+
     }
 
     public class MyBinder extends Binder {

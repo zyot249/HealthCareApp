@@ -33,9 +33,14 @@ import com.github.mikephil.charting.utils.ColorTemplate;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -116,15 +121,17 @@ public class MonthReportFragment extends Fragment {
         });
         mViewModel.getStepData().observe(getViewLifecycleOwner(), data -> {
             LineDataSet stepSet, caloSet, distanceSet;
-            ArrayList<Entry> stepList, caloList, distanceList;
-            stepList = new ArrayList<>();
-            caloList = new ArrayList<>();
-            distanceList = new ArrayList<>();
+            ArrayList<Entry> stepList = new ArrayList<>();
+            ArrayList<Entry> caloList = new ArrayList<>();
+            ArrayList<Entry> distanceList = new ArrayList<>();
+            Set<Integer> daysHadData = new HashSet<>();
+
             float steps, calo, distance;
             steps = calo = distance = 0;
             if (data.size() > 0) {
                 for (UserStepEntity userStepEntity : data) {
                     int dayOfMonth = MyDateTimeUtils.getDayOfMonth(userStepEntity.getTimestamp());
+                    daysHadData.add(dayOfMonth);
                     steps += userStepEntity.getAmountOfSteps();
                     calo += userStepEntity.getTotalCaloriesBurned();
                     distance += userStepEntity.getDistance();
@@ -133,6 +140,17 @@ public class MonthReportFragment extends Fragment {
                     caloList.add(new Entry(dayOfMonth, userStepEntity.getTotalCaloriesBurned()));
                     distanceList.add(new Entry(dayOfMonth, userStepEntity.getDistance()));
                 }
+                Calendar calendar = MyDateTimeUtils.getCalendarOfTime(mYear, mMonth, mDay);
+                int numOfDays = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+                for (int day = 1; day <= numOfDays; day++)
+                    if (!daysHadData.contains(day)) {
+                        stepList.add(new Entry(day, 0));
+                        caloList.add(new Entry(day, 0));
+                        distanceList.add(new Entry(day, 0));
+                    }
+                Collections.sort(stepList, (o1, o2) -> Float.compare(o1.getX(), o2.getX()));
+                Collections.sort(caloList, (o1, o2) -> Float.compare(o1.getX(), o2.getX()));
+                Collections.sort(distanceList, (o1, o2) -> Float.compare(o1.getX(), o2.getX()));
             }
             if (stepLineChart.getData() != null &&
                     stepLineChart.getData().getDataSetCount() > 0) {
@@ -146,7 +164,7 @@ public class MonthReportFragment extends Fragment {
                 stepLineChart.notifyDataSetChanged();
                 stepLineChart.invalidate();
             }
-            mViewModel.setSteps(String.valueOf(steps));
+            mViewModel.setSteps(String.format("%.0f", steps));
             mViewModel.setDistance(String.format("%.2f", distance));
             mViewModel.setCalo(String.format("%.2f", calo));
         });
@@ -182,20 +200,18 @@ public class MonthReportFragment extends Fragment {
         stepLineChart.getDescription().setEnabled(false);
         stepLineChart.setTouchEnabled(true);
         stepLineChart.setDragDecelerationFrictionCoef(0.9f);
-
-        // enable scaling and dragging
         stepLineChart.setDragEnabled(true);
         stepLineChart.setScaleEnabled(true);
         stepLineChart.setDrawGridBackground(false);
         stepLineChart.setHighlightPerDragEnabled(true);
+        stepLineChart.setPinchZoom(false);
+        stepLineChart.setDoubleTapToZoomEnabled(false);
 
-        // if disabled, scaling can be done on x- and y-axis separately
-        stepLineChart.setPinchZoom(true);
+        CustomMarkerView mv = new CustomMarkerView (this.getContext(), R.layout.marker_view);
+        stepLineChart.setMarker(mv);
 
-        // get the legend (only possible after setting data)
+        // get the legend
         Legend l = stepLineChart.getLegend();
-
-        // modify the legend ...
         l.setForm(Legend.LegendForm.LINE);
         l.setTextSize(11f);
         l.setTextColor(Color.WHITE);
@@ -229,8 +245,9 @@ public class MonthReportFragment extends Fragment {
         stepSet.setFillColor(ColorTemplate.getHoloBlue());
         stepSet.setHighLightColor(Color.rgb(244, 117, 117));
         stepSet.setDrawCircleHole(false);
+        stepSet.setDrawValues(false);
 
-        caloSet = new LineDataSet(new ArrayList<>(), "Calories");
+        caloSet = new LineDataSet(new ArrayList<>(), "Calorie");
         caloSet.setAxisDependency(YAxis.AxisDependency.LEFT);
         caloSet.setColor(Color.RED);
         caloSet.setCircleColor(Color.WHITE);
@@ -240,6 +257,7 @@ public class MonthReportFragment extends Fragment {
         caloSet.setFillColor(Color.RED);
         caloSet.setDrawCircleHole(false);
         caloSet.setHighLightColor(Color.rgb(244, 117, 117));
+        caloSet.setDrawValues(false);
 
         distanceSet = new LineDataSet(new ArrayList<>(), "Distance");
         distanceSet.setAxisDependency(YAxis.AxisDependency.LEFT);
@@ -251,6 +269,7 @@ public class MonthReportFragment extends Fragment {
         distanceSet.setFillColor(ColorTemplate.colorWithAlpha(Color.YELLOW, 200));
         distanceSet.setDrawCircleHole(false);
         distanceSet.setHighLightColor(Color.rgb(244, 117, 117));
+        distanceSet.setDrawValues(false);
 
         LineData data = new LineData(stepSet, caloSet, distanceSet);
         data.setValueTextColor(Color.WHITE);
@@ -268,6 +287,16 @@ public class MonthReportFragment extends Fragment {
     }
 
     private void configureActivityPieChart() {
+        // get the legend
+        Legend l = activityPieChart.getLegend();
+        l.setForm(Legend.LegendForm.LINE);
+        l.setTextSize(11f);
+        l.setTextColor(Color.WHITE);
+        l.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
+        l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.LEFT);
+        l.setOrientation(Legend.LegendOrientation.HORIZONTAL);
+        l.setDrawInside(false);
+
         activityPieChart.setNoDataText("No data");
         activityPieChart.setNoDataTextColor(Color.WHITE);
         activityPieChart.setUsePercentValues(true);
@@ -279,6 +308,7 @@ public class MonthReportFragment extends Fragment {
         activityPieChart.setHighlightPerTapEnabled(true);
         activityPieChart.setDrawEntryLabels(false);
         activityPieChart.getDescription().setEnabled(false);
+        activityPieChart.setRotationEnabled(false);
     }
 
     private void loadActivityData(int year, int month) {
