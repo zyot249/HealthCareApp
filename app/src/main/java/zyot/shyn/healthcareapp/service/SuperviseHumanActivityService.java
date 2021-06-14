@@ -27,6 +27,9 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.navigation.NavDeepLinkBuilder;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
@@ -82,6 +85,8 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
 
     private boolean isActive = false;
 
+    private FirebaseUser firebaseUser;
+
     private SharedPreferences sp;
     private Handler handler = new Handler();
     String CHANNEL_ID = "healthcareapp_supervisorservice";
@@ -98,6 +103,8 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
         Log.d(TAG, "onCreate");
         super.onCreate();
         createNotificationChannel();
+
+        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
         sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
@@ -327,7 +334,7 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
             HumanActivity state = HumanActivity.getHumanActivity(index);
             prevActivityDuration = now - startTimeOfCurState;
             if (state != curState) {
-                UserActivityEntity userActivityEntity = new UserActivityEntity(startTimeOfCurState, curState.getIndex(), prevActivityDuration);
+                UserActivityEntity userActivityEntity = new UserActivityEntity(startTimeOfCurState, firebaseUser.getUid(), curState.getIndex(), prevActivityDuration);
                 userActivityRepository.saveUserActivity(userActivityEntity)
                         .subscribeOn(Schedulers.io())
                         .subscribe(() -> {}, err -> Log.e(TAG, "Error: " + err.getMessage()));
@@ -385,7 +392,7 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
     public void loadDataToday() {
         final long now = MyDateTimeUtils.getCurrentTimestamp();
         long startTimeOfDate = MyDateTimeUtils.getStartTimeOfDate(now);
-        userActivityRepository.getUserActivityDataInDay(now)
+        userActivityRepository.getUserActivityDataInDay(firebaseUser.getUid(), now)
                 .subscribeOn(Schedulers.io())
                 .subscribe(data -> {
                     Log.d(TAG, "size " + data.size());
@@ -394,7 +401,7 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
                         userActivityData.put(timePointInDayOfState, activityEntity.getActivity());
                     }
                 }, err -> Log.d(TAG, "error: " + err.getMessage()));
-        userActivityRepository.getUserStepDataInDay(startTimeOfDate)
+        userActivityRepository.getUserStepDataInDay(firebaseUser.getUid(), startTimeOfDate)
                 .subscribeOn(Schedulers.io())
                 .subscribe(data -> {
                     if (data != null) {
@@ -410,11 +417,12 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
     }
 
     private void saveLastDataBeforeReset() {
-        UserActivityEntity userActivityEntity = new UserActivityEntity(startTimeOfCurState, curState.getIndex(), prevActivityDuration);
+        UserActivityEntity userActivityEntity = new UserActivityEntity(startTimeOfCurState, firebaseUser.getUid(), curState.getIndex(), prevActivityDuration);
         userActivityRepository.saveUserActivity(userActivityEntity)
                 .subscribeOn(Schedulers.io())
                 .subscribe(() -> {}, err -> Log.e(TAG, "Error: " + err.getMessage()));
         UserStepEntity userStepEntity = new UserStepEntity(MyDateTimeUtils.getStartTimeOfDate(lastTimeActPrediction),
+                firebaseUser.getUid(),
                 amountOfSteps,
                 walkingSteps, joggingSteps, downstairsSteps, upstairsSteps,
                 totalCaloriesBurned, totalDistance

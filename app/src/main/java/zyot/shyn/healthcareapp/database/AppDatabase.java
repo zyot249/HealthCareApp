@@ -10,12 +10,16 @@ import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import zyot.shyn.healthcareapp.dao.UserActivityDao;
+import zyot.shyn.healthcareapp.dao.UserHeightDao;
 import zyot.shyn.healthcareapp.dao.UserStepDao;
+import zyot.shyn.healthcareapp.dao.UserWeightDao;
 import zyot.shyn.healthcareapp.entity.UserActivityEntity;
+import zyot.shyn.healthcareapp.entity.UserHeightEntity;
 import zyot.shyn.healthcareapp.entity.UserStepEntity;
+import zyot.shyn.healthcareapp.entity.UserWeightEntity;
 
-@Database(entities = {UserActivityEntity.class, UserStepEntity.class},
-        version = 2, exportSchema = false)
+@Database(entities = {UserActivityEntity.class, UserStepEntity.class, UserWeightEntity.class, UserHeightEntity.class},
+        version = 3, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
     private static volatile AppDatabase instance;
 
@@ -54,4 +58,8 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract UserActivityDao userActivityDao();
 
     public abstract UserStepDao userStepDao();
+
+    public abstract UserWeightDao userWeightDao();
+
+    public abstract UserHeightDao userHeightDao();
 }

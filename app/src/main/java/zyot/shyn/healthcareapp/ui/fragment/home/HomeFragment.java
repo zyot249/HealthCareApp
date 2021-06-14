@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.text.InputType;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +31,8 @@ import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -41,14 +44,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import zyot.shyn.HumanActivity;
 import zyot.shyn.healthcareapp.R;
+import zyot.shyn.healthcareapp.entity.UserHeightEntity;
+import zyot.shyn.healthcareapp.entity.UserWeightEntity;
 import zyot.shyn.healthcareapp.event.UpdateUIEvent;
+import zyot.shyn.healthcareapp.repository.UserActivityRepository;
 import zyot.shyn.healthcareapp.service.SuperviseHumanActivityService;
 import zyot.shyn.healthcareapp.utils.MyDateTimeUtils;
 import zyot.shyn.healthcareapp.utils.MyStringUtils;
 
 public class HomeFragment extends Fragment implements View.OnClickListener {
+    private static final String TAG = HomeFragment.class.getSimpleName();
 
     private HomeViewModel homeViewModel;
 
@@ -66,14 +75,19 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
     private LineChart activityLineChart;
 
+    private FirebaseAuth mAuth;
+    private FirebaseUser firebaseUser;
+
+    private UserActivityRepository userActivityRepository;
+
     private SuperviseHumanActivityService service = null;
     private boolean isBound;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        homeViewModel =
-                new ViewModelProvider(this).get(HomeViewModel.class);
         View root = inflater.inflate(R.layout.fragment_home, container, false);
+        mAuth = FirebaseAuth.getInstance();
+        firebaseUser = mAuth.getCurrentUser();
         return root;
     }
 
@@ -94,6 +108,17 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         activityLineChart = view.findViewById(R.id.activity_line_chart);
         configureLineChart();
 
+        heightView.setOnClickListener(this);
+        weightView.setOnClickListener(this);
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        userActivityRepository = UserActivityRepository.getInstance(getActivity().getApplication());
+
+        homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
         homeViewModel.getWeight().observe(getViewLifecycleOwner(), s -> weightTxt.setText(s));
         homeViewModel.getHeight().observe(getViewLifecycleOwner(), s -> heightTxt.setText(s));
         homeViewModel.getSteps().observe(getViewLifecycleOwner(), s -> footStepsTxt.setText(s));
@@ -117,9 +142,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             activityLineChart.moveViewToX(activityLineChart.getXChartMax());
             activityLineChart.invalidate();
         });
-
-        heightView.setOnClickListener(this);
-        weightView.setOnClickListener(this);
+        loadDataInDay();
     }
 
     @Override
@@ -146,8 +169,17 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                             Dialog dialogObj = (Dialog) dialog;
                             EditText weightEt = dialogObj.findViewById(R.id.dialog_et);
                             String weight = weightEt.getText().toString();
+                            float w = Float.parseFloat(weight);
                             if (MyStringUtils.isNotEmpty(weight)) {
-                                homeViewModel.setWeight(weight);
+                                homeViewModel.setWeight(String.format("%.1f", w));
+                                UserWeightEntity userWeightEntity = new UserWeightEntity(
+                                        MyDateTimeUtils.getStartTimeOfCurrentDate(),
+                                        firebaseUser.getUid(), w
+                                );
+                                userActivityRepository.saveUserWeight(userWeightEntity)
+                                        .subscribeOn(Schedulers.io())
+                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .subscribe(() -> {}, err -> Log.e(TAG, "Error: " + err.getMessage()));
                             }
                         })
                         .setNegativeButton("Cancel", (dialog, which) -> {
@@ -161,8 +193,17 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                             Dialog dialogObj = (Dialog) dialog;
                             EditText weightEt = dialogObj.findViewById(R.id.dialog_et);
                             String height = weightEt.getText().toString();
+                            float h = Float.parseFloat(height);
                             if (MyStringUtils.isNotEmpty(height)) {
-                                homeViewModel.setHeight(height);
+                                homeViewModel.setHeight(String.format("%.1f", h));
+                                UserHeightEntity userHeightEntity = new UserHeightEntity(
+                                        MyDateTimeUtils.getStartTimeOfCurrentDate(),
+                                        firebaseUser.getUid(), h
+                                );
+                                userActivityRepository.saveUserHeight(userHeightEntity)
+                                        .subscribeOn(Schedulers.io())
+                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .subscribe(() -> {}, err -> Log.e(TAG, "Error: " + err.getMessage()));
                             }
                         })
                         .setNegativeButton("Cancel", (dialog, which) -> {
@@ -222,6 +263,25 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         activityLineChart.setScaleYEnabled(false);
 
         activityLineChart.invalidate();
+    }
+
+    public void loadDataInDay() {
+        userActivityRepository.getUserWeightRecent(firebaseUser.getUid())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe((data) -> {
+                    if (data != null) {
+                        homeViewModel.setWeight(String.format("%.1f", data.getWeight()));
+                    }
+                }, err -> Log.e(TAG, "Error: " + err.getMessage()));
+        userActivityRepository.getUserHeightRecent(firebaseUser.getUid())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe((data) -> {
+                    if (data != null) {
+                        homeViewModel.setHeight(String.format("%.1f", data.getHeight()));
+                    }
+                }, err -> Log.e(TAG, "Error: " + err.getMessage()));
     }
 
     private ServiceConnection mServiceConnection = new ServiceConnection() {

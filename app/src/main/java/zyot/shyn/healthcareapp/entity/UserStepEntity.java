@@ -1,16 +1,19 @@
 package zyot.shyn.healthcareapp.entity;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
-import androidx.room.PrimaryKey;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
 
-@Entity(tableName = "user_step")
+@Entity(tableName = "user_step", primaryKeys = {"timestamp", "uid"})
 public class UserStepEntity implements Serializable {
-    @PrimaryKey
     private long timestamp;
+    @NonNull
+    private String uid;
     @ColumnInfo(name = "amount_step")
     private int amountOfSteps;
     @ColumnInfo(name = "walking_step")
@@ -26,11 +29,13 @@ public class UserStepEntity implements Serializable {
     private float distance;
 
     public UserStepEntity() {
+        uid = "";
     }
 
     @Ignore
-    public UserStepEntity(long timestamp, int amountOfSteps, int walkingSteps, int joggingSteps, int downstairsSteps, int upstairsSteps, float totalCaloriesBurned, float distance) {
+    public UserStepEntity(long timestamp, @NotNull String uid, int amountOfSteps, int walkingSteps, int joggingSteps, int downstairsSteps, int upstairsSteps, float totalCaloriesBurned, float distance) {
         this.timestamp = timestamp;
+        this.uid = uid;
         this.amountOfSteps = amountOfSteps;
         this.walkingSteps = walkingSteps;
         this.joggingSteps = joggingSteps;
@@ -46,6 +51,15 @@ public class UserStepEntity implements Serializable {
 
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
+    }
+
+    @NotNull
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
     }
 
     public int getAmountOfSteps() {

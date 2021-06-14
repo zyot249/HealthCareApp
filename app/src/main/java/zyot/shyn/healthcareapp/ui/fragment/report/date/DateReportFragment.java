@@ -21,6 +21,8 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -51,6 +53,8 @@ public class DateReportFragment extends Fragment implements View.OnClickListener
 
     private MaterialDatePicker datePicker;
 
+    private FirebaseUser firebaseUser;
+
     public static DateReportFragment newInstance() {
         return new DateReportFragment();
     }
@@ -64,6 +68,7 @@ public class DateReportFragment extends Fragment implements View.OnClickListener
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         userActivityRepository = UserActivityRepository.getInstance(getActivity().getApplication());
         mViewModel = new ViewModelProvider(this).get(DateReportViewModel.class);
         mViewModel.getChosenDate().observe(getViewLifecycleOwner(), s -> {
@@ -156,23 +161,27 @@ public class DateReportFragment extends Fragment implements View.OnClickListener
     }
 
     private void loadActivityData(long timestamp) {
-        userActivityRepository.getUserActivityDataInDay(timestamp)
+        userActivityRepository.getUserActivityDataInDay(firebaseUser.getUid(), timestamp)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(data -> {
-                    Log.d(TAG, " activity size " + data.size());
-                    long startTimeOfDate = MyDateTimeUtils.getStartTimeOfDate(timestamp);
-                    HashMap<Float, Integer> userActivityData = new HashMap<>();
-                    for (UserActivityEntity activityEntity : data) {
-                        float timePointInDayOfState = (float) (activityEntity.getTimestamp() - startTimeOfDate) / 1000;
-                        userActivityData.put(timePointInDayOfState, activityEntity.getActivity());
-                    }
-                    mViewModel.setActivityData(userActivityData);
+                   if (data != null && data.size() > 0) {
+                       Log.d(TAG, " activity size " + data.size());
+                       long startTimeOfDate = MyDateTimeUtils.getStartTimeOfDate(timestamp);
+                       HashMap<Float, Integer> userActivityData = new HashMap<>();
+                       for (UserActivityEntity activityEntity : data) {
+                           float timePointInDayOfState = (float) (activityEntity.getTimestamp() - startTimeOfDate) / 1000;
+                           userActivityData.put(timePointInDayOfState, activityEntity.getActivity());
+                       }
+                       mViewModel.setActivityData(userActivityData);
+                   } else {
+                       mViewModel.setActivityData(null);
+                   }
                 }, err -> Log.e(TAG, "error: " + err.getMessage()));
     }
 
     private void loadStepData(long startTimeOfDate) {
-        userActivityRepository.getUserStepDataInDay(startTimeOfDate)
+        userActivityRepository.getUserStepDataInDay(firebaseUser.getUid(), startTimeOfDate)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(data -> {

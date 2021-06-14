@@ -30,6 +30,8 @@ import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -66,6 +68,8 @@ public class MonthReportFragment extends Fragment {
 
     int mYear, mMonth, mDay;
 
+    private FirebaseUser firebaseUser;
+
     private UserActivityRepository userActivityRepository;
 
     public static MonthReportFragment newInstance() {
@@ -85,6 +89,7 @@ public class MonthReportFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         userActivityRepository = UserActivityRepository.getInstance(getActivity().getApplication());
         mViewModel = new ViewModelProvider(this).get(MonthReportViewModel.class);
         mViewModel.getChosenMonth().observe(getViewLifecycleOwner(), s -> {
@@ -312,7 +317,7 @@ public class MonthReportFragment extends Fragment {
     }
 
     private void loadActivityData(int year, int month) {
-        userActivityRepository.getUserActivityDurationInMonth(year, month)
+        userActivityRepository.getUserActivityDurationInMonth(firebaseUser.getUid(), year, month)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(data -> {
@@ -327,7 +332,7 @@ public class MonthReportFragment extends Fragment {
     }
 
     private void loadStepData(int year, int month) {
-        userActivityRepository.getUserStepDataInMonth(year, month)
+        userActivityRepository.getUserStepDataInMonth(firebaseUser.getUid(), year, month)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(data -> {

@@ -17,9 +17,9 @@ public interface UserActivityDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     Completable insert(UserActivityEntity userActivityEntity);
 
-    @Query("SELECT * FROM user_activity WHERE timestamp >= :startTime AND timestamp <= :endTime")
-    Maybe<List<UserActivityEntity>> getUserActivityDataBetween(long startTime, long endTime);
+    @Query("SELECT * FROM user_activity WHERE uid = :uid AND timestamp >= :startTime AND timestamp <= :endTime")
+    Maybe<List<UserActivityEntity>> getUserActivityDataBetween(String uid, long startTime, long endTime);
 
-    @Query("SELECT activity, sum(duration) as totalduration FROM user_activity WHERE timestamp >= :startTime AND timestamp <= :endTime GROUP BY activity")
-    Maybe<List<ActivityDurationPOJO>> queryTotalTimeOfEachActivityBetween(long startTime, long endTime);
+    @Query("SELECT activity, sum(duration) as totalduration FROM user_activity WHERE uid = :uid AND timestamp >= :startTime AND timestamp <= :endTime GROUP BY activity")
+    Maybe<List<ActivityDurationPOJO>> queryTotalTimeOfEachActivityBetween(String uid, long startTime, long endTime);
 }

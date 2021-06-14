@@ -24,9 +24,9 @@ public interface UserStepDao {
     @Delete
     Completable delete(UserStepEntity userStepEntity);
 
-    @Query("SELECT * FROM user_step WHERE timestamp = :time")
-    Maybe<UserStepEntity> getUserStepInfo(long time);
+    @Query("SELECT * FROM user_step WHERE uid = :uid AND timestamp = :time")
+    Maybe<UserStepEntity> getUserStepInfo(String uid, long time);
 
-    @Query("SELECT * FROM user_step WHERE timestamp >= :startTime AND timestamp <= :endTime")
-    Maybe<List<UserStepEntity>> getUserStepInfoBetween(long startTime, long endTime);
+    @Query("SELECT * FROM user_step WHERE uid = :uid AND timestamp >= :startTime AND timestamp <= :endTime")
+    Maybe<List<UserStepEntity>> getUserStepInfoBetween(String uid, long startTime, long endTime);
 }
