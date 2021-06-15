@@ -1,7 +1,10 @@
 package zyot.shyn.healthcareapp.model;
 
+import androidx.annotation.Nullable;
+
 public class User {
     private String id;
+    private String email;
     private String displayName;
     private int birthYear;
     private String gender;
@@ -10,8 +13,9 @@ public class User {
     public User() {
     }
 
-    public User(String id, String displayName, int birthYear, String gender, String avatar) {
+    public User(String id, String email, String displayName, int birthYear, String gender, String avatar) {
         this.id = id;
+        this.email = email;
         this.displayName = displayName;
         this.birthYear = birthYear;
         this.gender = gender;
@@ -24,6 +28,14 @@ public class User {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getDisplayName() {
@@ -56,5 +68,23 @@ public class User {
 
     public void setAvatar(String avatar) {
         this.avatar = avatar;
+    }
+
+    @Override
+    public boolean equals(@Nullable @org.jetbrains.annotations.Nullable Object obj) {
+        if (obj == this) {
+            return true;
+        }
+
+        if (!(obj instanceof User)) {
+            return false;
+        }
+        User user = (User) obj;
+        return (this.id.equals(user.getId())
+        && this.email.equals(user.getEmail())
+        && this.avatar.equals(user.getAvatar())
+        && this.birthYear == user.getBirthYear()
+        && this.displayName.equals(user.getDisplayName())
+        && this.gender.equals(user.getGender()));
     }
 }

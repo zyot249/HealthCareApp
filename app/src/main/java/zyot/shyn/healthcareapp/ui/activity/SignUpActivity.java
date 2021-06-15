@@ -132,7 +132,7 @@ public class SignUpActivity extends BaseActivity {
                         Snackbar.make(submitBtn, "Register Successfully", Snackbar.LENGTH_SHORT).show();
                         // Write database
                         dbReference = FirebaseDatabase.getInstance().getReference("Users").child(userID);
-                        User user = new User(userID, displayName, age, gender, "default");
+                        User user = new User(userID, email, displayName, age, gender, "default");
 
                         dbReference.setValue(user).addOnCompleteListener(SignUpActivity.this, new OnCompleteListener<Void>() {
                             @Override

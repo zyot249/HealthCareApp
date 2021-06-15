@@ -47,17 +47,17 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics'
 
     //gg services
-    implementation 'com.google.firebase:firebase-core:18.0.3'
-    implementation 'com.google.firebase:firebase-auth:20.0.4'
+    implementation 'com.google.firebase:firebase-core:19.0.0'
+    implementation 'com.google.firebase:firebase-auth:21.0.1'
 
     //realtime database firebase
-    implementation 'com.google.firebase:firebase-database:19.7.0'
+    implementation 'com.google.firebase:firebase-database:20.0.0'
 
     //storage firebase
-    implementation 'com.google.firebase:firebase-storage:19.2.2'
+    implementation 'com.google.firebase:firebase-storage:20.0.0'
 
     //firebase cloud message
-    implementation 'com.google.firebase:firebase-messaging:21.1.0'
+    implementation 'com.google.firebase:firebase-messaging:22.0.0'
 
     //circle image view
     implementation 'de.hdodenhof:circleimageview:3.0.0'
