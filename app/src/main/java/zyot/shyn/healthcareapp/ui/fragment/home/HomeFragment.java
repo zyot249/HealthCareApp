@@ -44,6 +44,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import zyot.shyn.HumanActivity;
@@ -71,7 +72,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private TextView distanceTxt;
     private TextView spo2Txt;
     private TextView heartRateTxt;
-    private TextView curStateTxt;
+
+    private CircleImageView stateImg;
 
     private LineChart activityLineChart;
 
@@ -104,7 +106,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         distanceTxt = view.findViewById(R.id.distance_txt);
         spo2Txt = view.findViewById(R.id.spo2_txt);
         heartRateTxt = view.findViewById(R.id.heart_rate_txt);
-        curStateTxt = view.findViewById(R.id.cur_state_txt);
+        stateImg = view.findViewById(R.id.state_img);
         activityLineChart = view.findViewById(R.id.activity_line_chart);
         configureLineChart();
 
@@ -126,7 +128,24 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         homeViewModel.getDistance().observe(getViewLifecycleOwner(), s -> distanceTxt.setText(s));
         homeViewModel.getSpo2().observe(getViewLifecycleOwner(), s -> spo2Txt.setText(s));
         homeViewModel.getHeartRate().observe(getViewLifecycleOwner(), s -> heartRateTxt.setText(s));
-        homeViewModel.getCurState().observe(getViewLifecycleOwner(), s -> curStateTxt.setText(s));
+        homeViewModel.getCurState().observe(getViewLifecycleOwner(), s -> {
+            if (s.equals("UNKNOWN"))
+                stateImg.setImageResource(R.mipmap.unknown);
+            else if (s.equals("STANDING"))
+                stateImg.setImageResource(R.mipmap.standing);
+            else if (s.equals("BIKING"))
+                stateImg.setImageResource(R.mipmap.biking);
+            else if (s.equals("SITTING"))
+                stateImg.setImageResource(R.mipmap.sitting);
+            else if (s.equals("UPSTAIRS"))
+                stateImg.setImageResource(R.mipmap.upstairs);
+            else if (s.equals("DOWNSTAIRS"))
+                stateImg.setImageResource(R.mipmap.downstairs);
+            else if (s.equals("JOGGING"))
+                stateImg.setImageResource(R.mipmap.jogging);
+            else if (s.equals("WALKING"))
+                stateImg.setImageResource(R.mipmap.walking);
+        });
         homeViewModel.getActivityData().observe(getViewLifecycleOwner(), data -> {
             List<Entry> dataList = new ArrayList<>();
             data.entrySet().stream()

@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/backgroundColor"
     tools:context=".ui.fragment.home.HomeFragment">
 
     <ScrollView
@@ -30,13 +31,13 @@
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintWidth_percent="0.9"
-                app:strokeColor="@color/cardview_dark_background"
+                app:strokeColor="@color/cardStrokeColor"
                 app:strokeWidth="3dp">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@color/cardview_dark_background"
+                    android:background="@color/cardColor"
                     android:padding="16dp">
 
                     <LinearLayout
@@ -49,23 +50,16 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent">
 
-                        <TextView
+                        <de.hdodenhof.circleimageview.CircleImageView
+                            android:id="@+id/state_img"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_horizontal"
-                            android:text="State"
-                            android:textColor="#ffffff"
-                            android:textSize="22dp" />
-
-                        <TextView
-                            android:id="@+id/cur_state_txt"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="16dp"
-                            android:gravity="center_horizontal"
-                            android:text="UNKNOWN"
-                            android:textColor="#ffffff"
-                            android:textSize="36dp" />
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center"
+                            android:src="@mipmap/biking"
+                            app:civ_circle_background_color="@color/white"
+                            app:civ_border_color="@color/blue3"
+                            app:civ_border_overlay="true"
+                            app:civ_border_width="3dp" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -85,7 +79,7 @@
                             android:layout_weight="1"
                             android:gravity="center"
                             android:text="Foot Steps"
-                            android:textColor="@color/cardview_light_background"
+                            android:textColor="@color/white"
                             android:textSize="18dp" />
 
                         <TextView
@@ -95,7 +89,7 @@
                             android:layout_weight="1"
                             android:gravity="center"
                             android:text="510"
-                            android:textColor="@color/cardview_light_background"
+                            android:textColor="@color/white"
                             android:textSize="22dp" />
 
                     </LinearLayout>
@@ -117,7 +111,7 @@
                             android:layout_weight="1"
                             android:gravity="center"
                             android:text="Calories"
-                            android:textColor="@color/cardview_light_background"
+                            android:textColor="@color/white"
                             android:textSize="18dp" />
 
                         <TextView
@@ -127,7 +121,7 @@
                             android:layout_weight="1"
                             android:gravity="center"
                             android:text="510"
-                            android:textColor="@color/cardview_light_background"
+                            android:textColor="@color/white"
                             android:textSize="22dp" />
 
                     </LinearLayout>
@@ -149,7 +143,7 @@
                             android:layout_weight="1"
                             android:gravity="center"
                             android:text="Distance"
-                            android:textColor="@color/cardview_light_background"
+                            android:textColor="@color/white"
                             android:textSize="18dp" />
 
                         <TextView
@@ -159,7 +153,7 @@
                             android:layout_weight="1"
                             android:gravity="center"
                             android:text="510"
-                            android:textColor="@color/cardview_light_background"
+                            android:textColor="@color/white"
                             android:textSize="22dp" />
 
                     </LinearLayout>
@@ -178,13 +172,13 @@
                 app:layout_constraintStart_toStartOf="@+id/exercise_info_view"
                 app:layout_constraintTop_toBottomOf="@+id/exercise_info_view"
                 app:layout_constraintWidth_percent="0.9"
-                app:strokeColor="@color/cardview_dark_background"
+                app:strokeColor="@color/cardStrokeColor"
                 app:strokeWidth="3dp">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@color/cardview_dark_background"
+                    android:background="@color/cardColor"
                     android:padding="16dp">
 
                     <TextView
@@ -223,18 +217,18 @@
                 app:layout_constraintStart_toStartOf="@+id/exercise_info_view"
                 app:layout_constraintTop_toBottomOf="@+id/activity_graph_info_view"
                 app:layout_constraintWidth_percent="0.42"
-                app:strokeColor="@color/cardview_dark_background"
+                app:strokeColor="@color/cardStrokeColor"
                 app:strokeWidth="3dp">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@color/cardview_dark_background"
+                    android:background="@color/cardColor"
                     android:padding="16dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:orientation="vertical"
                         app:layout_constraintLeft_toLeftOf="parent"
                         app:layout_constraintTop_toTopOf="parent">
@@ -253,10 +247,10 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:gravity="start"
+                            android:gravity="bottom"
                             android:text="510"
                             android:textColor="@color/cardview_light_background"
-                            android:textSize="22dp" />
+                            android:textSize="40dp" />
 
                     </LinearLayout>
 
@@ -275,18 +269,18 @@
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/activity_graph_info_view"
                 app:layout_constraintWidth_percent="0.42"
-                app:strokeColor="@color/cardview_dark_background"
+                app:strokeColor="@color/cardStrokeColor"
                 app:strokeWidth="3dp">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@color/cardview_dark_background"
+                    android:background="@color/cardColor"
                     android:padding="16dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:orientation="vertical"
                         app:layout_constraintLeft_toLeftOf="parent"
                         app:layout_constraintTop_toTopOf="parent">
@@ -305,10 +299,10 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:gravity="start"
+                            android:gravity="bottom"
                             android:text="510"
                             android:textColor="@color/cardview_light_background"
-                            android:textSize="22dp" />
+                            android:textSize="40dp" />
 
                     </LinearLayout>
 
@@ -327,18 +321,18 @@
                 app:layout_constraintStart_toStartOf="@+id/weight_info_view"
                 app:layout_constraintTop_toBottomOf="@+id/weight_info_view"
                 app:layout_constraintWidth_percent="0.42"
-                app:strokeColor="@color/cardview_dark_background"
+                app:strokeColor="@color/cardStrokeColor"
                 app:strokeWidth="3dp">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@color/cardview_dark_background"
+                    android:background="@color/cardColor"
                     android:padding="16dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:orientation="vertical"
                         app:layout_constraintLeft_toLeftOf="parent"
                         app:layout_constraintTop_toTopOf="parent">
@@ -357,10 +351,10 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:gravity="start"
+                            android:gravity="bottom"
                             android:text="510"
                             android:textColor="@color/cardview_light_background"
-                            android:textSize="22dp" />
+                            android:textSize="40dp" />
 
                     </LinearLayout>
 
@@ -379,18 +373,18 @@
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/height_info_view"
                 app:layout_constraintWidth_percent="0.42"
-                app:strokeColor="@color/cardview_dark_background"
+                app:strokeColor="@color/cardStrokeColor"
                 app:strokeWidth="3dp">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@color/cardview_dark_background"
+                    android:background="@color/cardColor"
                     android:padding="16dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:orientation="vertical"
                         app:layout_constraintLeft_toLeftOf="parent"
                         app:layout_constraintTop_toTopOf="parent">
@@ -409,10 +403,10 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:gravity="start"
+                            android:gravity="bottom"
                             android:text="510"
                             android:textColor="@color/cardview_light_background"
-                            android:textSize="22dp" />
+                            android:textSize="40dp" />
 
                     </LinearLayout>
 

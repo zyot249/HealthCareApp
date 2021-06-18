@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/backgroundColor"
     tools:context=".ui.fragment.report.date.DateReportFragment">
 
     <ScrollView
@@ -27,6 +28,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
                 android:text="Daily Report"
+                android:textColor="@color/white"
                 android:textSize="26dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -39,6 +41,7 @@
                 android:layout_marginTop="6dp"
                 android:gravity="center_horizontal"
                 android:text="03/20/2021"
+                android:textColor="@color/white"
                 android:textSize="18dp"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
@@ -68,6 +71,7 @@
                         android:layout_weight="1"
                         android:gravity="center"
                         android:text="Foot Steps"
+                        android:textColor="@color/white"
                         android:textSize="18dp" />
 
                     <TextView
@@ -77,6 +81,7 @@
                         android:layout_weight="1"
                         android:gravity="center"
                         android:text="510"
+                        android:textColor="@color/white"
                         android:textSize="22dp" />
 
                 </LinearLayout>
@@ -93,6 +98,7 @@
                         android:layout_weight="1"
                         android:gravity="center"
                         android:text="Calories"
+                        android:textColor="@color/white"
                         android:textSize="18dp" />
 
                     <TextView
@@ -102,6 +108,7 @@
                         android:layout_weight="1"
                         android:gravity="center"
                         android:text="510"
+                        android:textColor="@color/white"
                         android:textSize="22dp" />
 
                 </LinearLayout>
@@ -118,6 +125,7 @@
                         android:layout_weight="1"
                         android:gravity="center"
                         android:text="Distance"
+                        android:textColor="@color/white"
                         android:textSize="18dp" />
 
                     <TextView
@@ -127,6 +135,7 @@
                         android:layout_weight="1"
                         android:gravity="center"
                         android:text="510"
+                        android:textColor="@color/white"
                         android:textSize="22dp" />
 
                 </LinearLayout>
@@ -142,13 +151,13 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/user_activity_info_layout"
                 app:layout_constraintWidth_percent="0.9"
-                app:strokeColor="@color/cardview_dark_background"
+                app:strokeColor="@color/cardStrokeColor"
                 app:strokeWidth="3dp">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@color/cardview_dark_background"
+                    android:background="@color/cardColor"
                     android:padding="16dp">
 
                     <TextView

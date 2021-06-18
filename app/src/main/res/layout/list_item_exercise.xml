@@ -23,6 +23,7 @@
         android:layout_marginLeft="16dp"
         android:layout_marginTop="6dp"
         android:text="Exercise"
+        android:textColor="@color/white"
         android:textSize="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/exercise_img"
