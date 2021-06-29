@@ -43,9 +43,10 @@ public class MyDateTimeUtils {
         return calendar;
     }
 
-    public static Date getDateFromTimeStringDefault(String time) {
+    public static Calendar getDateFromTimeStringDefault(String time) {
         try {
-            return SDF_TIME_DEFAULT.parse(time);
+            Date date = SDF_TIME_DEFAULT.parse(time);
+            return getCalendarFromTime(date.getHours(), date.getMinutes());
         } catch (ParseException e) {
             return null;
         }

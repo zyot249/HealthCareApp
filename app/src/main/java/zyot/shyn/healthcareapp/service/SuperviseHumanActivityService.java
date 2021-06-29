@@ -19,7 +19,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
-import android.speech.tts.TextToSpeech;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -36,27 +35,26 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Random;
 
 import io.reactivex.schedulers.Schedulers;
 import zyot.shyn.ActivityPrediction;
 import zyot.shyn.HARClassifier;
 import zyot.shyn.HumanActivity;
 import zyot.shyn.healthcareapp.R;
-import zyot.shyn.healthcareapp.event.UpdateUIEvent;
-import zyot.shyn.healthcareapp.ui.activity.MainActivity;
 import zyot.shyn.healthcareapp.base.Constants;
 import zyot.shyn.healthcareapp.entity.UserActivityEntity;
 import zyot.shyn.healthcareapp.entity.UserStepEntity;
+import zyot.shyn.healthcareapp.event.UpdateUIEvent;
 import zyot.shyn.healthcareapp.model.AccelerationData;
 import zyot.shyn.healthcareapp.repository.UserActivityRepository;
+import zyot.shyn.healthcareapp.ui.activity.MainActivity;
 import zyot.shyn.healthcareapp.utils.MyDateTimeUtils;
 
-public class SuperviseHumanActivityService extends Service implements SensorEventListener, StepListener {
+public class SuperviseHumanActivityService extends Service implements SensorEventListener {
     private static final String TAG = SuperviseHumanActivityService.class.getSimpleName();
     //Sensors
     private SensorManager mSensorManager;
-    private Sensor mAccelerometer, mGyroscope, mLinearAcceleration;
+    private Sensor mAccelerometer, mGyroscope, mLinearAcceleration, mStepDetectorSensor, mStepCounter;
 
     private long startTime = 0;
     long timeInMilliseconds = 0;
@@ -68,10 +66,10 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
     private static List<Float> lx, ly, lz;
     private static List<Float> gx, gy, gz;
 
-    private StepDetector stepDetector;
     HARClassifier classifier;
 
-    private int amountOfSteps;
+    private int prevStepCount;
+    private int totalSteps;
     private int walkingSteps, joggingSteps, downstairsSteps, upstairsSteps;
     private float totalCaloriesBurned = 0, totalDuration = 0, totalDistance = 0;
 
@@ -108,21 +106,27 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
 
         sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
-        ax = new ArrayList<>(); ay = new ArrayList<>(); az = new ArrayList<>();
-        lx = new ArrayList<>(); ly = new ArrayList<>(); lz = new ArrayList<>();
-        gx = new ArrayList<>(); gy = new ArrayList<>(); gz = new ArrayList<>();
+        ax = new ArrayList<>();
+        ay = new ArrayList<>();
+        az = new ArrayList<>();
+        lx = new ArrayList<>();
+        ly = new ArrayList<>();
+        lz = new ArrayList<>();
+        gx = new ArrayList<>();
+        gy = new ArrayList<>();
+        gz = new ArrayList<>();
 
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         mLinearAcceleration = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
 
+        mStepDetectorSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR);
+        mStepCounter = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
+
         lastTimeActPrediction = startTimeOfCurState = MyDateTimeUtils.getCurrentTimestamp();
 
         classifier = new HARClassifier(getApplicationContext());
-
-        stepDetector = new StepDetector();
-        stepDetector.registerStepListener(this);
 
         userActivityData = new HashMap<>();
         userActivityRepository = UserActivityRepository.getInstance(getApplication());
@@ -179,13 +183,6 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
                 ax.add(event.values[0]);
                 ay.add(event.values[1]);
                 az.add(event.values[2]);
-
-                AccelerationData newAccelerationData = new AccelerationData();
-                newAccelerationData.setX(event.values[0]);
-                newAccelerationData.setY(event.values[1]);
-                newAccelerationData.setZ(event.values[2]);
-                newAccelerationData.setTime(event.timestamp);
-                stepDetector.addAccelerationData(newAccelerationData);
                 break;
             case Sensor.TYPE_GYROSCOPE:
                 gx.add(event.values[0]);
@@ -196,6 +193,17 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
                 lx.add(event.values[0]);
                 ly.add(event.values[1]);
                 lz.add(event.values[2]);
+                break;
+
+            case (Sensor.TYPE_STEP_COUNTER):
+                if (prevStepCount < 1)
+                    prevStepCount = (int) event.values[0];
+
+                countStep((int) (event.values[0] - prevStepCount - totalSteps));
+                break;
+            case (Sensor.TYPE_STEP_DETECTOR):
+                if (mStepCounter == null)
+                    countStep((int) event.values[0]);
                 break;
         }
     }
@@ -214,6 +222,12 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
 
         if (mGyroscope != null)
             mSensorManager.registerListener(SuperviseHumanActivityService.this, mGyroscope, 20000);
+
+        if (mStepCounter != null)
+            mSensorManager.registerListener(SuperviseHumanActivityService.this, mStepCounter, SensorManager.SENSOR_DELAY_FASTEST);
+
+        if (mStepDetectorSensor != null)
+            mSensorManager.registerListener(SuperviseHumanActivityService.this, mStepDetectorSensor, SensorManager.SENSOR_DELAY_FASTEST);
     }
 
     private void unregisterSensors() {
@@ -225,6 +239,12 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
 
         if (mGyroscope != null)
             mSensorManager.unregisterListener(SuperviseHumanActivityService.this, mGyroscope);
+
+        if (mStepCounter != null)
+            mSensorManager.unregisterListener(SuperviseHumanActivityService.this, mStepCounter);
+
+        if (mStepDetectorSensor != null)
+            mSensorManager.unregisterListener(SuperviseHumanActivityService.this, mStepDetectorSensor);
     }
 
     public void startForegroundService() {
@@ -246,7 +266,8 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
     }
 
     public void resetData() {
-        amountOfSteps = 0;
+        prevStepCount = 0;
+        totalSteps = 0;
         walkingSteps = joggingSteps = downstairsSteps = upstairsSteps = 0;
         totalCaloriesBurned = 0;
         totalDistance = 0;
@@ -286,7 +307,7 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
     }
 
     private Notification updateNotification() {
-        Notification notification =  new NotificationCompat.Builder(this, CHANNEL_ID)
+        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.logo)
                 .setContentTitle(curState.toString())
                 .setPriority(NotificationCompat.PRIORITY_MIN)
@@ -310,9 +331,8 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
                 .setContentTitle(textTitle)
                 .setContentText(textContent)
                 .setContentIntent(resultPendingIntent)
-                .setOngoing(true)
                 .setAutoCancel(true)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+                .setPriority(NotificationCompat.PRIORITY_MIN);
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
         notificationManager.notify(warning_notify_id, builder.build());
@@ -337,7 +357,8 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
                 UserActivityEntity userActivityEntity = new UserActivityEntity(startTimeOfCurState, firebaseUser.getUid(), curState.getIndex(), prevActivityDuration);
                 userActivityRepository.saveUserActivity(userActivityEntity)
                         .subscribeOn(Schedulers.io())
-                        .subscribe(() -> {}, err -> Log.e(TAG, "Error: " + err.getMessage()));
+                        .subscribe(() -> {
+                        }, err -> Log.e(TAG, "Error: " + err.getMessage()));
 
                 startTimeOfCurState = lastTimeActPrediction;
                 curState = state;
@@ -348,23 +369,47 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
                 isWarn = false;
             }
 
-            long startTimeNightSleep = MyDateTimeUtils.getDateFromTimeStringDefault(sp.getString("startTimeNightSleep", "00:00")).getTime();
-            long endTimeNightSleep = MyDateTimeUtils.getDateFromTimeStringDefault(sp.getString("endTimeNightSleep", "07:00")).getTime();
-            long startTimeNoonSleep = MyDateTimeUtils.getDateFromTimeStringDefault(sp.getString("startTimeNoonSleep", "11:30")).getTime();
-            long endTimeNoonSleep = MyDateTimeUtils.getDateFromTimeStringDefault(sp.getString("endTimeNoonSleep", "13:30")).getTime();
-            long maxTimeForSitOrStand = sp.getLong("maxTimeSitOrStand", 1000);
-
-            activityDuration = now - startTimeOfCurState;
-            if ((now < startTimeNightSleep || now > endTimeNightSleep) &&
-                    (now < startTimeNoonSleep || now > endTimeNoonSleep) &&
-                    (curState == HumanActivity.SITTING || curState == HumanActivity.STANDING) &&
-                    activityDuration > maxTimeForSitOrStand && !isWarn) {
-                showNoti("Warning", "You need to do exercise now!!!");
-                isWarn = true;
-            }
-
+            checkAndShowWarning(now);
             lastTimeActPrediction = now;
         }
+    }
+
+    private void checkAndShowWarning(long now) {
+        if (isWarn)
+            return;
+
+        if (curState != HumanActivity.SITTING && curState != HumanActivity.STANDING)
+            return;
+
+        long startTimeNightSleep = MyDateTimeUtils.getDateFromTimeStringDefault(sp.getString("startTimeNightSleep", "00:00")).getTimeInMillis();
+        long endTimeNightSleep = MyDateTimeUtils.getDateFromTimeStringDefault(sp.getString("endTimeNightSleep", "07:00")).getTimeInMillis();
+        long startTimeNoonSleep = MyDateTimeUtils.getDateFromTimeStringDefault(sp.getString("startTimeNoonSleep", "11:30")).getTimeInMillis();
+        long endTimeNoonSleep = MyDateTimeUtils.getDateFromTimeStringDefault(sp.getString("endTimeNoonSleep", "13:30")).getTimeInMillis();
+        long maxTimeForSitOrStand = sp.getLong("maxTimeSitOrStand", 1000);
+
+        activityDuration = now - startTimeOfCurState;
+
+        if (startTimeNightSleep <= endTimeNightSleep) {
+            if (now >= startTimeNightSleep && now <= endTimeNightSleep)
+                return;
+        } else {
+            if (now >= startTimeNightSleep || now <= endTimeNightSleep)
+                return;
+        }
+
+        if (startTimeNoonSleep <= endTimeNoonSleep) {
+            if (now >= startTimeNoonSleep && now <= endTimeNoonSleep)
+                return;
+        } else {
+            if (now >= startTimeNoonSleep || now <= endTimeNoonSleep)
+                return;
+        }
+
+        if (activityDuration < maxTimeForSitOrStand)
+            return;
+
+        showNoti("Warning", "You need to do exercise now!!!");
+        isWarn = true;
     }
 
     public HashMap<String, String> getData() {
@@ -377,7 +422,7 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
                 String.format(Locale.ENGLISH, "%.0f", minutes) + "min " +
                 String.format(Locale.ENGLISH, "%.0f", seconds) + "s";
 
-        data.put("steps", String.valueOf(amountOfSteps));
+        data.put("steps", String.valueOf(totalSteps));
         data.put("distance", String.format(getString(R.string.distance), totalDistance));
         data.put("duration", duration);
         data.put("caloBurned", String.format(Locale.ENGLISH, "%.0f", totalCaloriesBurned));
@@ -405,7 +450,7 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
                 .subscribeOn(Schedulers.io())
                 .subscribe(data -> {
                     if (data != null) {
-                        amountOfSteps = data.getAmountOfSteps();
+                        totalSteps = data.getAmountOfSteps();
                         walkingSteps = data.getWalkingSteps();
                         joggingSteps = data.getJoggingSteps();
                         downstairsSteps = data.getDownstairsSteps();
@@ -420,16 +465,18 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
         UserActivityEntity userActivityEntity = new UserActivityEntity(startTimeOfCurState, firebaseUser.getUid(), curState.getIndex(), prevActivityDuration);
         userActivityRepository.saveUserActivity(userActivityEntity)
                 .subscribeOn(Schedulers.io())
-                .subscribe(() -> {}, err -> Log.e(TAG, "Error: " + err.getMessage()));
+                .subscribe(() -> {
+                }, err -> Log.e(TAG, "Error: " + err.getMessage()));
         UserStepEntity userStepEntity = new UserStepEntity(MyDateTimeUtils.getStartTimeOfDate(lastTimeActPrediction),
                 firebaseUser.getUid(),
-                amountOfSteps,
+                totalSteps,
                 walkingSteps, joggingSteps, downstairsSteps, upstairsSteps,
                 totalCaloriesBurned, totalDistance
         );
         userActivityRepository.saveUserStep(userStepEntity)
                 .subscribeOn(Schedulers.io())
-                .subscribe(() -> {}, err -> Log.e(TAG, "Error: " + err.getMessage()));
+                .subscribe(() -> {
+                }, err -> Log.e(TAG, "Error: " + err.getMessage()));
     }
 
     private void calculateResults() {
@@ -438,20 +485,21 @@ public class SuperviseHumanActivityService extends Service implements SensorEven
         totalCaloriesBurned = walkingSteps + 0.05f + joggingSteps * 0.2f + upstairsSteps * 0.1f + downstairsSteps * 0.05f;
     }
 
-    @Override
-    public void step(AccelerationData accelerationData, StepType stepType) {
+    public void countStep(int steps) {
+        if (steps <= 0)
+            return;
         if (curState == HumanActivity.WALKING) {
-            walkingSteps++;
-            amountOfSteps++;
+            walkingSteps += steps;
+            totalSteps += steps;
         } else if (curState == HumanActivity.JOGGING) {
-            joggingSteps++;
-            amountOfSteps++;
+            joggingSteps += steps;
+            totalSteps += steps;
         } else if (curState == HumanActivity.UPSTAIRS) {
-            upstairsSteps++;
-            amountOfSteps++;
+            upstairsSteps += steps;
+            totalSteps += steps;
         } else if (curState == HumanActivity.DOWNSTAIRS) {
-            downstairsSteps++;
-            amountOfSteps++;
+            downstairsSteps += steps;
+            totalSteps += steps;
         }
     }
 

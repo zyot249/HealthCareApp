@@ -17,6 +17,7 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.bumptech.glide.Glide;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -103,10 +104,22 @@ public class MainActivity extends BaseActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.action_logout) {
-            mAuth.signOut();
-            Intent intent = new Intent(getApplicationContext(), SignInActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-            finish();
+            MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);
+            dialogBuilder
+                    .setTitle("Logout")
+                    .setMessage("Are you sure to logout?")
+                    .setPositiveButton("YES", (dialog, which) -> {
+                        mAuth.signOut();
+                        Intent stopIntent = new Intent(this, SuperviseHumanActivityService.class);
+                        stopIntent.setAction(Constants.STOP_FOREGROUND);
+                        startService(stopIntent);
+
+                        Intent intent = new Intent(this, SignInActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                        finish();
+                    }).setNegativeButton("NO", (dialog, which) -> {
+
+            }).show();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -126,8 +139,8 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Intent stopIntent = new Intent(this, SuperviseHumanActivityService.class);
-        stopIntent.setAction(Constants.STOP_FOREGROUND);
-        startService(stopIntent);
+//        Intent stopIntent = new Intent(this, SuperviseHumanActivityService.class);
+//        stopIntent.setAction(Constants.STOP_FOREGROUND);
+//        startService(stopIntent);
     }
 }

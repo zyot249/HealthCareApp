@@ -51,11 +51,15 @@ import com.google.firebase.storage.UploadTask;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import zyot.shyn.healthcareapp.R;
+import zyot.shyn.healthcareapp.base.BaseActivity;
+import zyot.shyn.healthcareapp.base.Constants;
+import zyot.shyn.healthcareapp.service.SuperviseHumanActivityService;
 import zyot.shyn.healthcareapp.ui.activity.SignInActivity;
 import zyot.shyn.healthcareapp.model.User;
 import zyot.shyn.healthcareapp.utils.MyDateTimeUtils;
@@ -172,10 +176,10 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
         });
         settingViewModel.getMaxTimeSitting().observe(getViewLifecycleOwner(), s -> {
             maxTimeSittingTxt.setText(s);
-            Date date = MyDateTimeUtils.getDateFromTimeStringDefault(s);
-            if (date != null) {
+            Calendar calendar = MyDateTimeUtils.getDateFromTimeStringDefault(s);
+            if (calendar != null) {
                 SharedPreferences.Editor editor = sp.edit();
-                long duration = MyDateTimeUtils.getDuration(date.getHours(), date.getMinutes());
+                long duration = MyDateTimeUtils.getDuration(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE));
                 editor.putLong("maxTimeSitOrStand", duration);
                 editor.apply();
             }
@@ -437,10 +441,22 @@ public class SettingFragment extends Fragment implements View.OnClickListener {
                 break;
             }
             case R.id.logout_btn: {
-                mAuth.signOut();
-                Intent intent = new Intent(getContext(), SignInActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                getActivity().finish();
+                MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(getContext());
+                dialogBuilder
+                        .setTitle("Logout")
+                        .setMessage("Are you sure to logout?")
+                        .setPositiveButton("YES", (dialog, which) -> {
+                            mAuth.signOut();
+                            Intent stopIntent = new Intent(getActivity(), SuperviseHumanActivityService.class);
+                            stopIntent.setAction(Constants.STOP_FOREGROUND);
+                            getActivity().startService(stopIntent);
+
+                            Intent intent = new Intent(getContext(), SignInActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            startActivity(intent);
+                            getActivity().finish();
+                        }).setNegativeButton("NO", (dialog, which) -> {
+
+                        }).show();
                 break;
             }
         }
